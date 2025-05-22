@@ -4,7 +4,6 @@
 #include "Rectangle.h"
 #include "Vec3.h"
 
-// CosineWight
 Vec3 cos_weight_render(const Ray& r, const std::vector<std::shared_ptr<Object>>& scene, int depth) {
     if (depth <= 0) return Vec3(0, 0, 0);
 
@@ -27,18 +26,12 @@ Vec3 cos_weight_render(const Ray& r, const std::vector<std::shared_ptr<Object>>&
 
         Vec3 hit_point = r.at(closest_t);
         Vec3 normal = hit_object->get_normal(hit_point);
-        int light_samples = 1;
-        Vec3 accumulated(0.0f, 0.0f, 0.0f);
 
-        for(int k = 0; k < light_samples; k++) {
-            Vec3 target_direction = normal + cos_weight_sampling();
-            Ray scatterd(hit_point, target_direction.normalize());
-            // Vec3 incoming_color = ray_color(scatterd, scene, depth - 1);
-            accumulated += cos_weight_render(scatterd, scene, depth - 1);
-        }
-        accumulated /= float(light_samples);
+        Vec3 target_direction = normal + cos_weight_sampling();
+        Ray scatterd(hit_point, target_direction.normalize());
+        Vec3 incoming_color = cos_weight_render(scatterd, scene, depth - 1);
 
-        return hit_object->get_material()->get_albedo() * accumulated;
+        return hit_object->get_material()->get_albedo() * incoming_color;
 
     } else {
         // Vec3 unit_direction = r.direction.normalize();

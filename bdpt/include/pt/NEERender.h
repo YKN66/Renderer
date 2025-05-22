@@ -5,7 +5,6 @@
 #include "Vec3.h"
 
 
-//NEE
 Vec3 nee_render(const Ray& r, const std::vector<std::shared_ptr<Object>>& scene, int depth) {
     if (depth <= 0) return Vec3(0, 0, 0);
 
