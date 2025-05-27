@@ -9,9 +9,11 @@ public:
     LambertBRDF(const Vec3& color) : cd(color) {}
 
     Vec3 evaluate(const Vec3& N, const Vec3& L, const Vec3& V) const override {
-        float dotNL = std::max(N.dot(L), 0.0f);
+        // float dotNL = std::max(N.dot(L), 0.0f);
 
-        return (cd / M_PI) * dotNL;
+        // return (cd / M_PI) * dotNL;
+
+        return cd / M_PI;
     }
 
     Vec3 get_albedo() const override {

@@ -13,35 +13,17 @@ Vec3 bdpt_render(const Camera& camera, const std::vector<std::shared_ptr<Object>
     // std::cout << "size = ("<< c_path.size() <<", "<< l_path.size() <<")\n"; 
 
     Vec3 L = Vec3(0.0f, 0.0f, 0.0f);
-    Vec3 beta_camera = Vec3(1.0f, 1.0f, 1.0f);
-    Vec3 beta_light = Vec3(1.0f, 1.0f, 1.0f);
-
 
     for(size_t s = 0; s < c_path.size(); ++s) {
 
         const auto& v = c_path[s];
-
-        if(v.is_light) L += beta_camera * v.brdf->get_emission();
-
-        if (s+1 < c_path.size()){
-            const auto& next = c_path[s+1];
-            float cosT = std::max(0.f, v.normal.dot(next.wi));
-            Vec3  fs   = v.brdf->evaluate(v.normal, next.wi, v.wi);
-            beta_camera = beta_camera * fs * cosT / v.pdf_fwd;
-        }
+        if(v.is_light) L += v.brdf->get_emission();
 
         for(size_t t = 0; t < l_path.size(); ++t) {
             if(s + t > max_d) continue;
 
-            if (t+1 < l_path.size()){
-                const auto& next = l_path[t+1];
-                float cosT = std::max(0.f, v.normal.dot(next.wi));
-                Vec3  fs   = v.brdf->evaluate(v.normal, next.wi, v.wi);
-                beta_light = beta_light * fs * cosT / v.pdf_fwd;
-            }
-
-            Vec3 contribute = beta_camera * beta_light * connect_verices(c_path[s], l_path[t], scene);
-            // float w = mis_weight(c_path[s - 1], l_path[t - 1]);
+            Vec3 contribute = connect_verices(c_path[s], l_path[t], scene);
+            // float w = mis_weight(c_path[s], l_path[t]);
             // L += w * contribute;
             L += contribute;
         }

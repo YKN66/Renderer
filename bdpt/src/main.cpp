@@ -16,23 +16,26 @@ int main() {
     std::vector<std::shared_ptr<Object>> scene;
     Camera camera = controll_scene(image_width, image_height, scene);
 
-    int sample_num = 1;
+    int sample_num = 15;
 
     std::vector<unsigned char> pixels(image_width * image_height * 3);
 
     for(int j = image_height - 1; j >= 0; --j) {
         for(int i = 0; i < image_width; ++i) {
+            float u = (i + random_float()) / (image_width - 1);
+            float v = (j + random_float()) / (image_height - 1);
 
             Vec3 color = Vec3(0.0f, 0.0f, 0.0f);
-            for(int s = 0; s < sample_num; s++){
-                float u = (i + random_float()) / (image_width - 1);
-                float v = (j + random_float()) / (image_height - 1);
 
+            for(int s = 0; s < sample_num; s++){
+                // PT
                 Ray r = camera.get_ray(u, v);
                 color += cos_weight_render(r, scene, 50);
                 // color += nee_render(r, scene, 50);
 
+                // BDPT
                 // color += bdpt_render(camera, scene, u, v, 50);
+
             }
             color /= sample_num;
 
@@ -51,7 +54,8 @@ int main() {
         }
     }
 
-    stbi_write_png("output.png", image_width, image_height, 3/*RGB*/, pixels.data(), image_width * 3/*stride*/);
+    stbi_write_png("cos.png", image_width, image_height, 3/*RGB*/, pixels.data(), image_width * 3/*stride*/);
+    // stbi_write_png("nee.png", image_width, image_height, 3/*RGB*/, pixels.data(), image_width * 3/*stride*/);
     
     return 0;
 

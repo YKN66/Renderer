@@ -5,38 +5,52 @@
 #include "Vec3.h"
 
 Vec3 cos_weight_render(const Ray& r, const std::vector<std::shared_ptr<Object>>& scene, int depth) {
-    if (depth <= 0) return Vec3(0, 0, 0);
+    const float epsilon = 1e-3f;
+    const int RR = 3;
+    Vec3 throughput(1.0f, 1.0f, 1.0f);
+    Vec3 radiance(0.0f, 0.0f, 0.0f);
+    Ray ray = r;
 
-    float closest_t = 10000.0f;
-    std::shared_ptr<Object> hit_object = nullptr;
+    for(int bounce = 0; bounce < depth; bounce++) {
 
-    for (auto& obj : scene) {
-        float t;
-        if (obj->hit(r, 0.001f, closest_t, t)) {
-            closest_t = t;
-            hit_object = obj;
-        }
-    }
-
-    if (hit_object) {
-
-        if (hit_object->is_light()) {
-            return hit_object->get_material()->get_emission();
+        if(bounce >= RR) {
+            float p = std::clamp(std::max({throughput.x, throughput.y, throughput.z}), 0.0f, 0.99f);
+            // float p = std::min(std::max({throughput.x, throughput.y, throughput.z}), 0.99f);
+            if(random_float() > p) break;
+            throughput /= p;
         }
 
-        Vec3 hit_point = r.at(closest_t);
-        Vec3 normal = hit_object->get_normal(hit_point);
+        float closest_t = 1e30f;
+        std::shared_ptr<Object> hit_object = nullptr;
+        for(const auto& obj : scene) {
+            float t;
+            if(obj->hit(ray, epsilon, closest_t, t)) {
+                closest_t = t;
+                hit_object = obj;
+            }
+        }
+        if(!hit_object) break;
 
-        Vec3 target_direction = normal + cos_weight_sampling();
-        Ray scatterd(hit_point, target_direction.normalize());
-        Vec3 incoming_color = cos_weight_render(scatterd, scene, depth - 1);
+        Vec3 x = ray.at(closest_t);
+        Vec3 N = hit_object->get_normal(x);
+        Vec3 wo = -ray.direction.normalize();
 
-        return hit_object->get_material()->get_albedo() * incoming_color;
+        if(hit_object->is_light()) {
+            radiance += throughput * hit_object->get_material()->get_emission();
+            break;
+        }
 
-    } else {
-        // Vec3 unit_direction = r.direction.normalize();
-        // float t = 0.5f * (unit_direction.y + 1.0f);
-        // return (1.0f - t) * Vec3(1.0f, 1.0f, 1.0f) + t * Vec3(0.5f, 0.7f, 1.0f);
-        return Vec3(0.1f, 0.1f, 0.1f);
+        float pdf;
+        Vec3 wi = hit_object->get_material()->sample(N, wo, pdf);
+        if(pdf <= 0) break;
+
+        Vec3 brdf = hit_object->get_material()->evaluate(N, wi, wo);
+        float cos_theta = std::max(0.0f, N.dot(wi));
+
+        throughput *= brdf * cos_theta / pdf;
+
+        ray = Ray(x + N * epsilon, wi);
     }
+
+    return radiance;
 }
