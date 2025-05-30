@@ -5,6 +5,7 @@
 #include "Ray.h"
 #include "Camera.h"
 #include "Scene.h"
+#include "WhittedRender.h"
 #include "CosWeightRender.h"
 #include "NEERender.h"
 #include "BDTPRender.h"
@@ -17,7 +18,7 @@ int main() {
     std::vector<std::shared_ptr<Object>> scene;
     Camera camera = controll_scene(image_width, image_height, scene);
 
-    int sample_num = 2400;
+    int sample_num = 30;
 
     int n = 1;
 
@@ -34,9 +35,12 @@ int main() {
                 Vec3 color = Vec3(0.0f, 0.0f, 0.0f);
 
                 for(int s = 0; s < sample_num; s++){
-                    // PT
+
                     Ray r = camera.get_ray(u, v);
-                    color += cos_weight_render(r, scene, 50);
+                    // RT
+                    color += whitted_render(r, scene);
+                    // PT
+                    // color += cos_weight_render(r, scene, 50);
                     // color += nee_render(r, scene, 50);
 
                     // BDPT
@@ -64,7 +68,8 @@ int main() {
             }
         }
 
-        stbi_write_png("cos.png", image_width, image_height, 3/*RGB*/, pixels.data(), image_width * 3/*stride*/);
+        stbi_write_png("rt.png", image_width, image_height, 3/*RGB*/, pixels.data(), image_width * 3/*stride*/);
+        // stbi_write_png("cos.png", image_width, image_height, 3/*RGB*/, pixels.data(), image_width * 3/*stride*/);
         // stbi_write_png("nee.png", image_width, image_height, 3/*RGB*/, pixels.data(), image_width * 3/*stride*/);
         // stbi_write_png("bdpt.png", image_width, image_height, 3/*RGB*/, pixels.data(), image_width * 3/*stride*/);
 
