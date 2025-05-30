@@ -12,7 +12,7 @@ Vec3 nee_render(const Ray& r, const std::vector<std::shared_ptr<Object>>& scene,
     Vec3 radiance(0.0f, 0.0f, 0.0f);
     Ray ray = r;
 
-    for(int bounce = 0; bounce < depth; bounce++){
+    for(int bounce = 0; bounce < depth; ++bounce){
 
         if(bounce >= RR){
             float p = std::clamp(std::max({throughput.x, throughput.y, throughput.z}), 0.0f, 0.99f);

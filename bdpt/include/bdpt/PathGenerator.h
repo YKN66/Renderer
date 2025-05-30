@@ -3,7 +3,7 @@
 #include "BRDF.h"
 #include "Path.h"
 
-std::vector<PathVertex> generate_camera_subpath(const Camera& camera, const std::vector<std::shared_ptr<Object>>& scene, float u, float v, int max_d) {
+std::vector<PathVertex> generate_camera_subpath(const Camera& camera, const std::vector<std::shared_ptr<Object>>& scene, float u, float v, int depth) {
     std::vector<PathVertex> path;
 
     Vec3 origin = camera.pos;
@@ -11,8 +11,8 @@ std::vector<PathVertex> generate_camera_subpath(const Camera& camera, const std:
 
     Ray ray(origin, dir);
 
-    for(int i = 0; i < max_d; ++i) {
-        float closest_t = 1e6f;
+    for(int bounce = 0; bounce < depth; ++bounce) {
+        float closest_t = 1e30f;
         std::shared_ptr<Object> hit_obj = nullptr;
 
         for(const auto& obj : scene) {
@@ -25,20 +25,19 @@ std::vector<PathVertex> generate_camera_subpath(const Camera& camera, const std:
 
         if(!hit_obj) break;
 
-        Vec3 hit_point = ray.at(closest_t);
-        Vec3 normal = hit_obj->get_normal(hit_point);
-        Vec3 wi = -ray.direction.normalize();
+        Vec3 x = ray.at(closest_t);
+        Vec3 N = hit_obj->get_normal(x);
+        Vec3 wo = -ray.direction.normalize();
         std::shared_ptr<BRDF> brdf = hit_obj->get_material();
 
         //方向サンプリング
         float pdf;
-        Vec3 next_dir = brdf->sample(normal, wi, pdf);
-        // std::cout << "size = ("<< pdf <<")\n"; 
+        Vec3 next_dir = brdf->sample(N, wo, pdf);
 
         PathVertex vertex;
-        vertex.pos = hit_point;
-        vertex.normal = normal;
-        vertex.wi = wi;
+        vertex.x = x;
+        vertex.N = N;
+        vertex.wi = wo;
         vertex.brdf = brdf;
         vertex.pdf_fwd = pdf;
         vertex.pdf_rev = pdf;
@@ -49,13 +48,13 @@ std::vector<PathVertex> generate_camera_subpath(const Camera& camera, const std:
 
         if(pdf < 1e-6f) break;
 
-        ray = Ray(hit_point, next_dir);
+        ray = Ray(x + N * 1e-6f, next_dir);
     }
 
     return path;
 }
 
-std::vector<PathVertex> generate_light_subpath(const std::vector<std::shared_ptr<Object>>& scene, int max_d) {
+std::vector<PathVertex> generate_light_subpath(const std::vector<std::shared_ptr<Object>>& scene, int depth) {
     std::vector<PathVertex> path;
 
     std::vector<std::shared_ptr<Object>> lights;
@@ -68,8 +67,8 @@ std::vector<PathVertex> generate_light_subpath(const std::vector<std::shared_ptr
     auto light = lights[0];
     auto rect = std::dynamic_pointer_cast<Rectangle>(light);
 
-    Vec3 x = sample_light_rectangle(rect->get_center(), rect->get_u(), rect->get_v());
-    Vec3 nL = rect->get_normal(x);
+    Vec3 L0 = sample_light_rectangle(rect->get_center(), rect->get_u(), rect->get_v());
+    Vec3 nL = rect->get_normal(L0);
 
     //サンプリングの方向　local to world
     Vec3 dir_local = cos_weight_sampling();
@@ -80,9 +79,8 @@ std::vector<PathVertex> generate_light_subpath(const std::vector<std::shared_ptr
     float pdf = std::max(0.0f, nL.dot(wi_world));
 
     PathVertex vertex;
-    vertex.pos = x;
-    vertex.normal = nL;
-    // vertex.wi = Vec3(0.0f ,0.0f ,0.0f);
+    vertex.x = L0;
+    vertex.N = nL;
     vertex.wi = -wi_world;
     vertex.brdf = rect->get_material();
     vertex.pdf_fwd = 1.0f / rect->get_area();
@@ -90,10 +88,10 @@ std::vector<PathVertex> generate_light_subpath(const std::vector<std::shared_ptr
     vertex.is_light = true;
     path.push_back(vertex);
 
-    Ray ray(x, wi_world);
+    Ray ray(L0 + nL * 1e-6f, wi_world);
 
-    for(int i = 0; i < max_d; ++i) {
-        float closest_t = 1e6f;
+    for(int bounce = 0; bounce < depth; ++bounce) {
+        float closest_t = 1e30f;
         std::shared_ptr<Object> hit_obj = nullptr;
 
         for(const auto& obj : scene) { 
@@ -106,26 +104,25 @@ std::vector<PathVertex> generate_light_subpath(const std::vector<std::shared_ptr
 
         if(!hit_obj) break;
 
-        Vec3 hit_point = ray.at(closest_t);
-        Vec3 normal = hit_obj->get_normal(hit_point);
+        Vec3 x = ray.at(closest_t);
+        Vec3 N = hit_obj->get_normal(x);
         Vec3 wi = -ray.direction.normalize();
         auto brdf = hit_obj->get_material();
-        float pdf = brdf->pdf(normal, wi);
+        float pdf = brdf->pdf(N, wi);
 
-        vertex.pos = hit_point;
-        vertex.normal = normal;
+        vertex.x = x;
+        vertex.N = N;
         vertex.wi = wi;
         vertex.brdf = brdf;
         vertex.pdf_fwd = pdf;
         vertex.pdf_rev = pdf;
         vertex.is_light = hit_obj->is_light();
-
         path.push_back(vertex);
 
-        Vec3 next_dir = brdf->sample(normal, wi, pdf);
+        Vec3 next_dir = brdf->sample(N, wi, pdf);
         if(pdf < 1e-6f) break;
 
-        ray = Ray(hit_point, next_dir);
+        ray = Ray(x + N * 1e-6f, next_dir);
     }
 
     return path;

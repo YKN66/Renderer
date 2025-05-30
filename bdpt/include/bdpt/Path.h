@@ -3,8 +3,8 @@
 #include "BRDF.h"
 
 struct PathVertex {
-    Vec3 pos;
-    Vec3 normal;
+    Vec3 x;
+    Vec3 N;
     Vec3 wi; //入射方向
     std::shared_ptr<BRDF> brdf;
     float pdf_fwd = 1.0f;
