@@ -9,7 +9,9 @@
 #include "CosWeightRender.h"
 #include "NEERender.h"
 #include "BDTPRender.h"
+
 #include <sstream>
+#include <filesystem>
 
 
 int main() {
@@ -18,9 +20,11 @@ int main() {
     std::vector<std::shared_ptr<Object>> scene;
     Camera camera = controll_scene(image_width, image_height, scene);
 
-    int sample_num = 30;
+    int sample_num = 1;
 
     int n = 1;
+    int ss = 1;
+    int tt = 0;
 
     for(int k = 1; k <= n; k++){
 
@@ -36,9 +40,9 @@ int main() {
 
                 for(int s = 0; s < sample_num; s++){
 
-                    Ray r = camera.get_ray(u, v);
+                    // Ray r = camera.get_ray(u, v);
                     // RT
-                    color += whitted_render(r, scene);
+                    // color += whitted_render(r, scene);
                     // PT
                     // color += cos_weight_render(r, scene, 50);
                     // color += nee_render(r, scene, 50);
@@ -48,7 +52,7 @@ int main() {
 
                     // Ray r = camera.get_ray(u, v);
                     // color += cos_weight_render_n(r, scene, k);
-                    // color += bdpt_render(camera, scene, u, v, 2);
+                    color += bdpt_render_n(camera, scene, u, v, 1, ss, tt);
 
                 }
                 color /= sample_num;
@@ -68,14 +72,20 @@ int main() {
             }
         }
 
-        stbi_write_png("rt.png", image_width, image_height, 3/*RGB*/, pixels.data(), image_width * 3/*stride*/);
+        // stbi_write_png("rt.png", image_width, image_height, 3/*RGB*/, pixels.data(), image_width * 3/*stride*/);
         // stbi_write_png("cos.png", image_width, image_height, 3/*RGB*/, pixels.data(), image_width * 3/*stride*/);
         // stbi_write_png("nee.png", image_width, image_height, 3/*RGB*/, pixels.data(), image_width * 3/*stride*/);
         // stbi_write_png("bdpt.png", image_width, image_height, 3/*RGB*/, pixels.data(), image_width * 3/*stride*/);
 
-        // std::ostringstream filename;
-        // filename << "png/" << k << "_bdpt.png";
-        // stbi_write_png(filename.str().c_str(), image_width, image_height, 3, pixels.data(), image_width * 3);
+        std::ostringstream dir_path;
+        dir_path << "png/bdpt/" << ss + tt + 1;
+
+        std::filesystem::create_directories(dir_path.str());
+
+        std::ostringstream filename;
+        filename << dir_path.str() << "/(" << ss << ", " << tt << ").png";
+
+        stbi_write_png(filename.str().c_str(), image_width, image_height, 3, pixels.data(), image_width * 3);
 
     }
 
