@@ -4,10 +4,10 @@ import matplotlib.pyplot as plt
 from scipy.ndimage import gaussian_filter
 
 
-img_A = cv2.imread('../bdpt1/build/cos.png', cv2.IMREAD_UNCHANGED).astype(np.float32)
-img_B = cv2.imread('../bdpt1/build/nee.png', cv2.IMREAD_UNCHANGED).astype(np.float32)
-# img_A = cv2.imread('../bdpt1/build/png/2_cos.png', cv2.IMREAD_UNCHANGED).astype(np.float32)
-# img_B = cv2.imread('../bdpt1/build/png/2_bdpt.png', cv2.IMREAD_UNCHANGED).astype(np.float32)
+# img_A = cv2.imread('../build/cos.png', cv2.IMREAD_UNCHANGED).astype(np.float32)
+# img_B = cv2.imread('..build/nee.png', cv2.IMREAD_UNCHANGED).astype(np.float32)
+img_A = cv2.imread('../build/cos.png', cv2.IMREAD_UNCHANGED).astype(np.float32)
+img_B = cv2.imread('../build/bdpt.png', cv2.IMREAD_UNCHANGED).astype(np.float32)
 
 print(f"img_A.shape: {img_A.shape}")
 print(f"img_B.shape: {img_B.shape}")
