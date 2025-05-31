@@ -9,6 +9,8 @@ public:
         constexpr float EPS_DIR = 0.999f;
         return (N.dot(L) > 0.0f && L.dot(V) > EPS_DIR)
                  ? Vec3(1.0f, 1.0f, 1.0f) : Vec3(0.0f, 0.0f, 0.0f);
+
+        // return (N.dot(L) > 0.0f) ? Vec3(1.0f, 1.0f, 1.0f) : Vec3(0.0f, 0.0f, 0.0f);
     }
 
     Vec3 get_albedo() const override {
