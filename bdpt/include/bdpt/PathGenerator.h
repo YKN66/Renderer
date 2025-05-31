@@ -7,7 +7,18 @@ std::vector<PathVertex> generate_camera_subpath(const Camera& camera, const std:
     std::vector<PathVertex> path;
 
     Vec3 origin = camera.pos;
-    Vec3 dir = camera.get_ray(u, v).direction;
+    Vec3 dir = camera.get_ray(u, v).direction.normalize();
+    auto sensor = std::make_shared<CameraBRDF>();
+
+    PathVertex vertex;
+    vertex.x = origin;
+    vertex.N = -camera.w;
+    vertex.wi = dir;
+    vertex.brdf = sensor;
+    vertex.pdf_fwd = 1.0f;
+    vertex.pdf_rev = 1.0f;
+    vertex.is_light = false;
+    path.push_back(vertex);
 
     Ray ray(origin, dir);
 
@@ -34,7 +45,7 @@ std::vector<PathVertex> generate_camera_subpath(const Camera& camera, const std:
         float pdf;
         Vec3 next_dir = brdf->sample(N, wo, pdf);
 
-        PathVertex vertex;
+        // PathVertex vertex;
         vertex.x = x;
         vertex.N = N;
         vertex.wi = wo;

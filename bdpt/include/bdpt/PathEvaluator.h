@@ -31,9 +31,11 @@ Vec3 connect_verices(const PathVertex& vertex_c, const PathVertex& vertex_l, con
 
     Vec3 fs_cam = vertex_c.brdf->evaluate(vertex_c.N, wi, vertex_c.wi);
     Vec3 fs_lig = vertex_l.is_light ? Vec3(1.0f, 1.0f, 1.0f) : vertex_l.brdf->evaluate(vertex_l.N, -wi, vertex_l.wi);
-    // float G = cos_c * cos_l / dist2;
-    // Vec3 contribute = fs_cam * fs_lig * Vec3(G, G, G);
-    Vec3 contribute = fs_cam * fs_lig;
+    // Vec3 fs_cam(1.0f, 1.0f, 1.0f);
+    // Vec3 fs_lig(1.0f, 1.0f, 1.0f);
+    float G = cos_c * cos_l / dist2;
+    Vec3 contribute = fs_cam * fs_lig * Vec3(G, G, G);
+    // Vec3 contribute = fs_cam * fs_lig;
 
     // std::cout << "countribute = ("<< contribute.x <<", "<< contribute.y <<", "<< contribute.z <<")\n";
 
@@ -52,7 +54,7 @@ float mis_weight(const PathVertex& camera, const PathVertex& light) {
 }
 
 float simple_mis(int s, int t, float pdf_cam, float pdf_lig) {
-    if(pdf_cam == 0.0f || pdf_lig == 0.0f) return 0.0f;
+    // if(pdf_cam == 0.0f || pdf_lig == 0.0f) return 0.0f;
     // return 1.0f / float(s + t + 1);
     return 1.0f;
 }

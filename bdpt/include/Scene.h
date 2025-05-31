@@ -9,6 +9,7 @@
 #include "PhongBRDF.h"
 #include "CookTorranceBRDF.h"
 #include "Emission.h"
+#include "CameraBRDF.h"
 
 Camera controll_scene(const int w, const int h, std::vector<std::shared_ptr<Object>>& scene) {
     float aspect = float(w) / (h);
@@ -50,8 +51,10 @@ Camera controll_scene(const int w, const int h, std::vector<std::shared_ptr<Obje
     auto blue = std::make_shared<LambertBRDF>(Vec3(0.1f, 0.9f, 0.1f));
     auto green = std::make_shared<LambertBRDF>(Vec3(0.1f, 0.1f, 0.9f));
     auto white = std::make_shared<LambertBRDF>(Vec3(1.0f, 1.0f, 1.0f));
-
     auto light_obj = std::make_shared<Emission>(Vec3(3.0f, 3.0f, 3.0f));
+    // auto light_obj = std::make_shared<Emission>(Vec3(3.0f, 0.0f, 0.0f));
+
+
     scene.push_back(std::make_shared<Rectangle>(Vec3(0, -1, 0), Vec3(0, 0, 1), Vec3(1, 0, 0), red));
     // scene.push_back(std::make_shared<Rectangle>(Vec3(0, 1, 0), Vec3(1, 0, 0), Vec3(0, 0, 1), light_obj, true));
     scene.push_back(std::make_shared<Rectangle>(Vec3(0, 1, 0), Vec3(0.5, 0, 0), Vec3(0, 0, 0.5), light_obj, true));
