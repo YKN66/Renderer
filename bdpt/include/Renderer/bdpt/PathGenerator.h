@@ -8,7 +8,7 @@ std::vector<PathVertex> generate_camera_subpath(const Camera& camera, const std:
 
     Vec3 origin = camera.pos;
     Vec3 dir = camera.get_ray(u, v).direction.normalize();
-    auto sensor = std::make_shared<CameraBRDF>();
+    auto sensor = std::make_shared<Sensor>();
 
     PathVertex vertex;
     vertex.x = origin;

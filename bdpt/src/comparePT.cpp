@@ -20,14 +20,14 @@ int main() {
     std::vector<std::shared_ptr<Object>> scene;
     Camera camera = controll_scene(image_width, image_height, scene);
 
-    int bdpt_sample_num = 20;
-    int cos_sample_num = 100;
+    int bdpt_sample_num = 5;
+    int cos_sample_num = 20;
     int max_path_length = 5;
 
     std::filesystem::create_directories("compare");
 
     for (int path_length = 1; path_length <= max_path_length; ++path_length) {
-        std::cout << "Rendering path length " << path_length << "..." << std::endl;
+        std::cout << "Rendering path length " << path_length << std::endl;
         
         std::ostringstream path_dir;
         path_dir << "compare/length_" << path_length;

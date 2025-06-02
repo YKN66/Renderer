@@ -19,7 +19,7 @@ int main() {
     std::vector<std::shared_ptr<Object>> scene;
     Camera camera = controll_scene(image_width, image_height, scene);
 
-    int sample_num = 100;
+    int sample_num = 1000;
 
     std::vector<unsigned char> pixels(image_width * image_height * 3);
 
@@ -37,8 +37,8 @@ int main() {
                 // RT
                 // color += whitted_render(r, scene);
                 // PT
-                color += cos_weight_render(r, scene, 50);
-                // color += nee_render(r, scene, 50);
+                // color += cos_weight_render(r, scene, 50);
+                color += nee_render(r, scene, 50);
 
                 // BDPT
                 // color += bdpt_render(camera, scene, u, v, 50);
@@ -64,8 +64,8 @@ int main() {
     std::filesystem::create_directories("results");
     std::ostringstream filename;
     // filename << "results/rt.png";
-    filename << "results/cos.png";
-    // filename << "results/nee.png";
+    // filename << "results/cos.png";
+    filename << "results/nee.png";
     // filename << "results/bdpt.png";
     stbi_write_png(filename.str().c_str(), image_width, image_height, 3, pixels.data(), image_width * 3);
 

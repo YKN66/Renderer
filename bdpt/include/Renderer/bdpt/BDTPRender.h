@@ -6,9 +6,12 @@
 #include "PathEvaluator.h"
 #include <cmath>
 #include <iostream>
+#include <vector>
+#include <memory>
+
 
 Vec3 bdpt_render(const Camera& camera, const std::vector<std::shared_ptr<Object>>& scene, float u, float v, int max_depth) {
-
+    
     auto c_path = generate_camera_subpath(camera, scene, u, v, max_depth);
     auto l_path = generate_light_subpath(scene, max_depth);
 
@@ -37,22 +40,6 @@ Vec3 bdpt_render(const Camera& camera, const std::vector<std::shared_ptr<Object>
         beta_l[i] = beta_l[i-1] * fs * cos_theta / std::max(vi.pdf_fwd, 1e-6f);
     }
 
-    // for(size_t s = 0; s < c_path.size(); ++s) {
-
-    //     if(c_path[s].is_light && int(s)==max_depth){
-    //         radiance += beta_c[s] * c_path[s].brdf->get_emission();
-    //     }
-
-    //     for(size_t t = 0; t < l_path.size(); ++t) {
-    //         if (s != 1 || t != 0) continue;
-
-    //         Vec3 G = connect_verices(c_path[s], l_path[t], scene);
-    //         Vec3 contribute = beta_c[s] * beta_l[t] * G;
-    //         float w = simple_mis(s, t, c_path[s].pdf_fwd, l_path[t].pdf_fwd);
-    //         radiance += w * contribute;
-    //     }
-    // }
-
     // Connect all possible path combinations
     for (size_t s = 1; s <= c_path.size(); ++s) {
         for (size_t t = 0; t <= l_path.size(); ++t) {
@@ -65,7 +52,10 @@ Vec3 bdpt_render(const Camera& camera, const std::vector<std::shared_ptr<Object>
                 if (s <= c_path.size() && c_path[s-1].is_light) {
                     radiance += beta_c[s-1] * c_path[s-1].brdf->get_emission();
                 }
-            } else if (t <= l_path.size()) {
+            } else if(s == 0) {
+                // Lighty path hits camera lens directly(s = 0, t > 0)
+                return radiance;
+            }else if (t <= l_path.size()) {
                 // Connect camera and light vertices (s > 0, t > 0)
                 Vec3 G = connect_verices(c_path[s-1], l_path[t-1], scene);
                 Vec3 contribute = beta_c[s-1] * beta_l[t-1] * G;
@@ -122,65 +112,76 @@ Vec3 bdpt_render_n(const Camera& camera, const std::vector<std::shared_ptr<Objec
         Vec3 fs = vi.is_light ? Vec3(1.0f, 1.0f, 1.0f): vi.brdf->evaluate(vi.N, d, vi.wi);
 
         beta_l[i] = beta_l[i-1] * fs * cos_theta / std::max(vi.pdf_fwd, 1e-6f);
-
-        // std::cout << "cos : "<< cos_theta <<"\n";
-        // std::cout << "fs = ("<< fs.x <<", "<< fs.y <<", "<< fs.z <<")\n";
-        // std::cout << "beta_l[i-1] = ("<< beta_l[i-1].x <<", "<< beta_l[i-1].y <<", "<< beta_l[i-1].z <<")\n\n";
     }
 
 
-    // for(size_t s = 0; s < c_path.size(); ++s) {
+    size_t s = ss;
+    size_t t = tt;
 
-    //     if(c_path[s].is_light && int(s)==depth){
-    //         // std::cout << "s : "<< s <<"\n";
-    //         radiance += beta_c[s] * c_path[s].brdf->get_emission();
-    //         // std::cout << "b = ("<< beta_c[s].x <<", "<< beta_c[s].y <<", "<< beta_c[s].z <<")\n";
-    //         // std::cout << "e = ("<< c_path[s].brdf->get_emission().x <<", "<< c_path[s].brdf->get_emission().y <<", "<< c_path[s].brdf->get_emission().z <<")\n";
-    //         // std::cout << "c = ("<< radiance.x <<", "<< radiance.y <<", "<< radiance.z <<")\n\n";
-    //     }
-
-    //     for(size_t t = 0; t < l_path.size(); ++t) {
-    //         // if(s + t > depth) continue;
-    //         if (s != ss || t != tt) continue;
-    //         // if(int(s + t) != depth) continue;
-
-    //         // std::cout << "s : "<< s <<"\n";
-    //         // std::cout << "t : "<< t <<"\n\n";
-
-    //         Vec3 G = connect_verices(c_path[s], l_path[t], scene);
-    //         Vec3 contribute = beta_c[s] * beta_l[t] * G;
-    //         // float w = mis_weight(c_path[s], l_path[t]);
-    //         float w = simple_mis(s, t, c_path[s].pdf_fwd, l_path[t].pdf_fwd);
-    //         radiance += w * contribute;
-
-    //         // std::cout << "G = ("<< G.x <<", "<< G.y <<", "<< G.z <<")\n";
-    //         // std::cout << "contribute = ("<< contribute.x <<", "<< contribute.y <<", "<< contribute.z <<")\n\n";
+        // Guard 無効ケース
+    if (s == 0 && t == 0) return radiance;
+    // Light Tracing
+    if (s == 0 && t > 0) {
+        return radiance;
+    }
+    // Camera → Light 直接
+    if (t == 0 && s > 0) {
+        if (s <= c_path.size() && c_path[s-1].is_light) {
+            radiance =  beta_c[s-1] * c_path[s-1].brdf->get_emission();
+        }
+    }
+    // Dual connection
+    if (s > 0 && t > 0) {
+        if (s <= c_path.size() && t <= l_path.size()) {
+            Vec3 G = connect_verices(c_path[s-1], l_path[t-1], scene);
+            radiance =  beta_c[s-1] * beta_l[t-1] * G;
+        }
+    }
+    
+    // if (s == 0 && t == 0) {
+    //     return radiance; // Invalid
+    // } else if (s == 0 && t > 0) {// Light path hits camera directly
+    //     return radiance;
+    // } else if (t == 0 && s > 0) { // Camera path hits light directly
+    //     if (s <= c_path.size() && c_path[s-1].is_light)
+    //         radiance = beta_c[s-1] * c_path[s-1].brdf->get_emission();
+    // } else if (s > 0 && t > 0) {
+    //     // Connect camera and light vertices
+    //     if (s <= c_path.size() && t <= l_path.size()) {
+    //         Vec3 G = connect_verices(c_path[s-1], l_path[t-1], scene);
+    //         Vec3 contribute = beta_c[s-1] * beta_l[t-1] * G;
+    //         radiance = contribute;
     //     }
     // }
 
-    // Only evaluate the specific (s,t) strategy requested
-    size_t s = ss;
-    size_t t = tt;
-    
-    if (s == 0 && t == 0) {
-        // Invalid: need at least one vertex
-        return radiance;
-    } else if (s == 0 && t > 0) {
-        // Light tracing only - skip for now
-        return radiance;
-    } else if (t == 0 && s > 0) {
-        // Camera path hits light directly
-        if (s <= c_path.size() && c_path[s-1].is_light) {
-            radiance = beta_c[s-1] * c_path[s-1].brdf->get_emission();
-        }
-    } else if (s > 0 && t > 0) {
-        // Connect camera and light vertices
-        if (s <= c_path.size() && t <= l_path.size()) {
-            Vec3 G = connect_verices(c_path[s-1], l_path[t-1], scene);
-            Vec3 contribute = beta_c[s-1] * beta_l[t-1] * G;
-            radiance = contribute;
-        }
-    }
-
     return radiance;
+}
+
+inline void accumulate_light_only(const std::vector<PathVertex>& l_path, const std::vector<Vec3>& beta_l, const Camera& camera, int W, int H, std::vector<Vec3>& framebuffer, int t) {
+    if(t < 2 || l_path.size() < 2) return;
+    int idx = t - 2;
+    if(idx >= l_path.size()) return;
+    const auto& v = l_path[idx];
+
+    Vec3 dir = v.x - camera.pos;
+    float dist2 = dir.length_squared();
+    float dist = std::sqrt(dist2);
+    dir /= dist;
+
+    float s_img, t_img;
+    if(!camera.project_dir(dir, s_img, t_img)) return;
+
+
+    int px = int(s_img * W);
+    int py = int(t_img *(H - 1));
+    if(px < 0 || px >= W || py < 0 || py >= H) return;
+
+    float cos_cam = std::max(0.0f, (-camera.w).dot(dir));
+    float cos_l = std::max(0.0f, v.N.dot(-dir));
+    if(cos_cam == 0.0f || cos_l == 0.0f) return;
+
+    float G = (cos_cam * cos_l) / dist2;
+    Vec3 fs = v.is_light ? Vec3(1.0f, 1.0f, 1.0f) : v.brdf->evaluate(v.N, -dir, v.wi);
+    Vec3 contribute = beta_l[idx] * G * fs;
+    framebuffer[py * W + px] += contribute;
 }

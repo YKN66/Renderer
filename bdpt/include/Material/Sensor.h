@@ -2,7 +2,7 @@
 #include "BRDF.h"
 #include <cmath>
 
-class CameraBRDF : public BRDF{
+class Sensor : public BRDF{
 public:
 
     Vec3 evaluate(const Vec3& N, const Vec3& L, const Vec3& V) const override {

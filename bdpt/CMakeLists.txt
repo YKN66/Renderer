@@ -8,9 +8,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/include
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Material
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/bdpt
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/pt
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/rt
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Objects
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Renderer/bdpt
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Renderer/pt
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Renderer/rt
 
 )
 
