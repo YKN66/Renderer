@@ -129,37 +129,37 @@ int main() {
         }
     }
 
-    // std::cout << "\nRendering combined BDPT" << std::endl;
-    // std::vector<unsigned char> pixels(image_width * image_height * 3);
+    std::cout << "\nRendering combined BDPT" << std::endl;
+    std::vector<unsigned char> pixels(image_width * image_height * 3);
 
-    // for(int j = image_height - 1; j >= 0; --j) {
-    //     for(int i = 0; i < image_width; ++i) {
-    //         Vec3 color(0.0f, 0.0f, 0.0f);
+    for(int j = image_height - 1; j >= 0; --j) {
+        for(int i = 0; i < image_width; ++i) {
+            Vec3 color(0.0f, 0.0f, 0.0f);
 
-    //         for(int sample = 0; sample < sample_num; sample++) {
-    //             float u = (i + random_float()) / (image_width - 1);
-    //             float v = (j + random_float()) / (image_height - 1);
+            for(int sample = 0; sample < sample_num; sample++) {
+                float u = (i + random_float()) / (image_width - 1);
+                float v = (j + random_float()) / (image_height - 1);
                 
-    //             color += bdpt_render(camera, scene, u, v, max_path_length);
-    //         }
-    //         color /= sample_num;
+                color += bdpt_render(camera, scene, u, v, max_path_len);
+            }
+            color /= sample_num;
 
-    //         color.x = std::pow(std::min(1.0f, std::max(0.0f, color.x)), 1.0f/2.2f);
-    //         color.y = std::pow(std::min(1.0f, std::max(0.0f, color.y)), 1.0f/2.2f);
-    //         color.z = std::pow(std::min(1.0f, std::max(0.0f, color.z)), 1.0f/2.2f);
+            color.x = std::pow(std::min(1.0f, std::max(0.0f, color.x)), 1.0f/2.2f);
+            color.y = std::pow(std::min(1.0f, std::max(0.0f, color.y)), 1.0f/2.2f);
+            color.z = std::pow(std::min(1.0f, std::max(0.0f, color.z)), 1.0f/2.2f);
 
-    //         int ir = static_cast<int>(255.99 * color.x);
-    //         int ig = static_cast<int>(255.99 * color.y);
-    //         int ib = static_cast<int>(255.99 * color.z);
+            int ir = static_cast<int>(255.99 * color.x);
+            int ig = static_cast<int>(255.99 * color.y);
+            int ib = static_cast<int>(255.99 * color.z);
 
-    //         size_t idx = ((image_height - 1 - j) * image_width + i) * 3;
-    //         pixels[idx + 0] = static_cast<unsigned char>(ir);
-    //         pixels[idx + 1] = static_cast<unsigned char>(ig);
-    //         pixels[idx + 2] = static_cast<unsigned char>(ib);
-    //     }
-    // }
+            size_t idx = ((image_height - 1 - j) * image_width + i) * 3;
+            pixels[idx + 0] = static_cast<unsigned char>(ir);
+            pixels[idx + 1] = static_cast<unsigned char>(ig);
+            pixels[idx + 2] = static_cast<unsigned char>(ib);
+        }
+    }
 
-    // stbi_write_png("bdpt_results/bdpt_combined.png", image_width, image_height, 3, pixels.data(), image_width * 3);
+    stbi_write_png("bdpt_results/bdpt_combined.png", image_width, image_height, 3, pixels.data(), image_width * 3);
     
     return 0;
 }
