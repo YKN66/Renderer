@@ -1,0 +1,1 @@
+/usr/bin/c++  -arch arm64 -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/bdpt.dir/src/BDPT.cpp.o CMakeFiles/bdpt.dir/src/Vec3.cpp.o CMakeFiles/bdpt.dir/src/Ray.cpp.o CMakeFiles/bdpt.dir/src/Camera.cpp.o -o bdpt

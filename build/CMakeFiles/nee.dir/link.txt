@@ -1,0 +1,1 @@
+/usr/bin/c++  -arch arm64 -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/nee.dir/src/NEE.cpp.o CMakeFiles/nee.dir/src/Vec3.cpp.o CMakeFiles/nee.dir/src/Ray.cpp.o CMakeFiles/nee.dir/src/Camera.cpp.o -o nee

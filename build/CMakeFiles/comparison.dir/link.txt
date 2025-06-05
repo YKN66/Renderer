@@ -1,0 +1,1 @@
+/usr/bin/c++  -arch arm64 -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/comparison.dir/src/comparePT.cpp.o CMakeFiles/comparison.dir/src/Vec3.cpp.o CMakeFiles/comparison.dir/src/Ray.cpp.o CMakeFiles/comparison.dir/src/Camera.cpp.o -o comparison

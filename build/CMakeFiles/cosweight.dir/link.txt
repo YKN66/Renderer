@@ -1,0 +1,1 @@
+/usr/bin/c++  -arch arm64 -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/cosweight.dir/src/CosWeightPT.cpp.o CMakeFiles/cosweight.dir/src/Vec3.cpp.o CMakeFiles/cosweight.dir/src/Ray.cpp.o CMakeFiles/cosweight.dir/src/Camera.cpp.o -o cosweight
