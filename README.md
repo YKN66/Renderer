@@ -1,7 +1,7 @@
 # Bidirectional Path Tracing Renderer  
 _C++17 / CMake / stb_image_write / tinyobjloader_
 
-![Cornell Box – BDPT 32 spp](docs/images/cornell_box_bdpt.png)
+![パストレーシングによるレンダリング画像](docs/images/cos.png)
 
 
 > レイトレーシング → コサイン加重パストレーシング → Next Event Estimation → **双方向パストレーシング (BDPT)**  
@@ -26,10 +26,10 @@ _C++17 / CMake / stb_image_write / tinyobjloader_
 ## 概要<a name="概要"></a>
 長方形と球体の衝突判定を行うレンダリングをレイトレーシング → パストレーシング → NEEにて実装。また、それらを多重重点的サンプリングにて組み合わせたBDPT(双方向パストレーシング)の実装を進めている。
 
-## 前提知識<a name="前提"></a>
-
 ## ディレクトリ構成<a name="ディレクトリ"></a>
-enderer/
+
+```
+Renderer/
 ├─ include/             # ヘッダ (Vec3, Ray, BRDF, Object, …)
 ├─ src/                 # 実装 (BDPTRender, PathGenerator, …)
 ├─ diff/                # レンダリング結果の期待値検証
@@ -37,15 +37,12 @@ enderer/
 │   └─ images/          # README 用スクリーンショット
 ├─ CMakeLists.txt
 └─ README.md
+```
+
+
+## 前提知識<a name="前提"></a>
 ### レンダリングとは
 <p>CG分野におけるレンダリングとは3Dシーン、光源情報、カメラ情報を入力として2D画像を生成する処理のことを指す。</p>
-
-<br>
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/3e66ce3b-a197-46f9-9762-546c33d1bc4c" style="width: 70%;"><br>
-  レンダリングのイメージ図
-</p>
-<br>
   
 ### レンダリング方程式
 <p>
@@ -131,6 +128,7 @@ CMake ≥ 3.16
 stb_image_write(ヘッダのみ)
 
 git clone https://github.com/your-id/Renderer.git
+
 cd Renderer
 
 ### CMake ビルド
@@ -165,15 +163,13 @@ deactivate                     # 仮想環境終了
 
 ## レンダリング画像<a name="画像"></a>
 
-`docs/images/` フォルダに以下のファイル名で配置してください。
-
 | ファイル | 内容 |
 | :-- | :-- |
-| `rt.png` | レイトレーシングの結果 |
-| `cos.png` | コサインウェイトサンプリングによるパストレーシングの結果 |
-| `nee.png` | NEEを用いたパストレーシングの結果 |
-| `bdpt.png` | 双方向パストレーシングの結果 |
-| `abs_diff_gaussian.png` | `diff.py` による差分ヒートマップ |
+| ![rt](docs/images/rt.png) | レイトレーシングの結果 |
+| ![cos](docs/images/cos.png) | コサインウェイトサンプリングによるパストレーシングの結果 |
+| ![nee](docs/images/nee.png) | NEEを用いたパストレーシングの結果 |
+| ![bdpt](docs/images/bdpt.png) | 双方向パストレーシングの結果 |
+| ![diff](docs/images/abs_diff_gaussian.png) | `diff.py` による差分ヒートマップ |
 
 ## 検証フロー<a name="検証"></a>
 同一シーンかつ同一のパス長においては、理論上すべてのレンダリング手法が導き出す放射輝度の期待値は一致するはずです。したがって、レンダリング結果同士の差分画像は理想的には**完全な白（差分ゼロ）**となります。
