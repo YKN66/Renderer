@@ -1,4 +1,4 @@
-#include "stb_image_write.h"
+#include "PFM.h"
 #include <iostream>
 #include <random>
 #include "Vec3.h"
@@ -34,7 +34,6 @@ int main() {
         std::filesystem::create_directories(path_dir.str());
 
         std::cout << "  Rendering BDPT" << std::endl;
-        std::vector<unsigned char> bdpt_pixels(image_width * image_height * 3);
 
         std::vector<Vec3> fb(image_width * image_height, Vec3(0.0f, 0.0f, 0.0f));
 
@@ -68,8 +67,6 @@ int main() {
                 }
             }
             else {
-                if (t < 0 || s < 0) continue;
-
                 for(int j = image_height - 1; j >= 0; --j) {
                     for(int i = 0; i < image_width; ++i) {
                         Vec3 color(0.0f, 0.0f, 0.0f);
@@ -88,33 +85,25 @@ int main() {
             }
         }
 
-        /* ガンマ補正 PNG 出力 */
-        std::vector<unsigned char> png(image_width * image_height * 3);
+        std::vector<float> pixels(image_width * image_height * 3);
         for (int j = image_height - 1; j >= 0; --j) {
             for (int i = 0; i < image_width; ++i) {
-                Vec3 c = fb[j * image_width + i] / float(bdpt_sample_num);
+                Vec3 color = fb[j * image_width + i] / float(bdpt_sample_num);
 
-                c.x = std::min(1.0f, std::max(0.0f, c.x));
-                c.y = std::min(1.0f, std::max(0.0f, c.y));
-                c.z = std::min(1.0f, std::max(0.0f, c.z));
+                size_t idx = (j * image_width + i) * 3; 
+                pixels[idx + 0] = color.x; 
+                pixels[idx + 1] = color.y; 
+                pixels[idx + 2] = color.z; 
 
-                int ir = static_cast<int>(255.99f * c.x);
-                int ig = static_cast<int>(255.99f * c.y);
-                int ib = static_cast<int>(255.99f * c.z);
-
-                size_t idx = ((image_height - 1 - j) * image_width + i) * 3;
-                png[idx + 0] = static_cast<unsigned char>(ir);
-                png[idx + 1] = static_cast<unsigned char>(ig);
-                png[idx + 2] = static_cast<unsigned char>(ib);
             }
         }
 
         std::ostringstream bdpt_filename;
-        bdpt_filename << path_dir.str() << "/bdpt.png";
-        stbi_write_png(bdpt_filename.str().c_str(), image_width, image_height, 3, png.data(), image_width * 3);
+        bdpt_filename << path_dir.str() << "/bdpt.pfm";
+        write_pfm(bdpt_filename.str(), pixels, image_width, image_height);
 
         std::cout << "  Rendering PT (CosWeight)" << std::endl;
-        std::vector<unsigned char> png2(image_width * image_height * 3);
+        std::vector<float> pixels2(image_width * image_height * 3);
 
         for(int j = image_height - 1; j >= 0; --j) {
             for(int i = 0; i < image_width; ++i) {
@@ -129,24 +118,16 @@ int main() {
                 }
                 color /= cos_sample_num;
 
-                color.x = std::min(1.0f, std::max(0.0f, color.x));
-                color.y = std::min(1.0f, std::max(0.0f, color.y));
-                color.z = std::min(1.0f, std::max(0.0f, color.z));
-
-                int ir = static_cast<int>(255.99 * color.x);
-                int ig = static_cast<int>(255.99 * color.y);
-                int ib = static_cast<int>(255.99 * color.z);
-
-                size_t idx = ((image_height - 1 - j) * image_width + i) * 3;
-                png2[idx + 0] = static_cast<unsigned char>(ir);
-                png2[idx + 1] = static_cast<unsigned char>(ig);
-                png2[idx + 2] = static_cast<unsigned char>(ib);
+                size_t idx = (j * image_width + i) * 3; 
+                pixels2[idx + 0] = color.x; 
+                pixels2[idx + 1] = color.y; 
+                pixels2[idx + 2] = color.z; 
             }
         }
 
         std::ostringstream pt_filename;
-        pt_filename << path_dir.str() << "/cos.png";
-        stbi_write_png(pt_filename.str().c_str(), image_width, image_height, 3, png2.data(), image_width * 3);
+        pt_filename << path_dir.str() << "/cos.pfm";
+        write_pfm(pt_filename.str(), pixels2, image_width, image_height);
 
         std::cout << "  Path length " << path_length << " complete!" << std::endl;
     }

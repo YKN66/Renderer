@@ -169,17 +169,67 @@ bdpt/fast:
 .PHONY : bdpt/fast
 
 #=============================================================================
-# Target rules for targets named comparison
+# Target rules for targets named compPT
 
 # Build rule for target.
-comparison: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 comparison
-.PHONY : comparison
+compPT: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 compPT
+.PHONY : compPT
 
 # fast build rule for target.
-comparison/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/comparison.dir/build.make CMakeFiles/comparison.dir/build
-.PHONY : comparison/fast
+compPT/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/compPT.dir/build.make CMakeFiles/compPT.dir/build
+.PHONY : compPT/fast
+
+#=============================================================================
+# Target rules for targets named comp2
+
+# Build rule for target.
+comp2: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 comp2
+.PHONY : comp2
+
+# fast build rule for target.
+comp2/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/comp2.dir/build.make CMakeFiles/comp2.dir/build
+.PHONY : comp2/fast
+
+#=============================================================================
+# Target rules for targets named pfm2png
+
+# Build rule for target.
+pfm2png: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 pfm2png
+.PHONY : pfm2png
+
+# fast build rule for target.
+pfm2png/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/pfm2png.dir/build.make CMakeFiles/pfm2png.dir/build
+.PHONY : pfm2png/fast
+
+diff/Gaussian_Blur.o: diff/Gaussian_Blur.cpp.o
+.PHONY : diff/Gaussian_Blur.o
+
+# target to build an object file
+diff/Gaussian_Blur.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/comp2.dir/build.make CMakeFiles/comp2.dir/diff/Gaussian_Blur.cpp.o
+.PHONY : diff/Gaussian_Blur.cpp.o
+
+diff/Gaussian_Blur.i: diff/Gaussian_Blur.cpp.i
+.PHONY : diff/Gaussian_Blur.i
+
+# target to preprocess a source file
+diff/Gaussian_Blur.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/comp2.dir/build.make CMakeFiles/comp2.dir/diff/Gaussian_Blur.cpp.i
+.PHONY : diff/Gaussian_Blur.cpp.i
+
+diff/Gaussian_Blur.s: diff/Gaussian_Blur.cpp.s
+.PHONY : diff/Gaussian_Blur.s
+
+# target to generate assembly for a file
+diff/Gaussian_Blur.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/comp2.dir/build.make CMakeFiles/comp2.dir/diff/Gaussian_Blur.cpp.s
+.PHONY : diff/Gaussian_Blur.cpp.s
 
 src/BDPT.o: src/BDPT.cpp.o
 .PHONY : src/BDPT.o
@@ -214,7 +264,7 @@ src/Camera.cpp.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/cosweight.dir/build.make CMakeFiles/cosweight.dir/src/Camera.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/nee.dir/build.make CMakeFiles/nee.dir/src/Camera.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/bdpt.dir/build.make CMakeFiles/bdpt.dir/src/Camera.cpp.o
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/comparison.dir/build.make CMakeFiles/comparison.dir/src/Camera.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/compPT.dir/build.make CMakeFiles/compPT.dir/src/Camera.cpp.o
 .PHONY : src/Camera.cpp.o
 
 src/Camera.i: src/Camera.cpp.i
@@ -226,7 +276,7 @@ src/Camera.cpp.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/cosweight.dir/build.make CMakeFiles/cosweight.dir/src/Camera.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/nee.dir/build.make CMakeFiles/nee.dir/src/Camera.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/bdpt.dir/build.make CMakeFiles/bdpt.dir/src/Camera.cpp.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/comparison.dir/build.make CMakeFiles/comparison.dir/src/Camera.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/compPT.dir/build.make CMakeFiles/compPT.dir/src/Camera.cpp.i
 .PHONY : src/Camera.cpp.i
 
 src/Camera.s: src/Camera.cpp.s
@@ -238,7 +288,7 @@ src/Camera.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/cosweight.dir/build.make CMakeFiles/cosweight.dir/src/Camera.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/nee.dir/build.make CMakeFiles/nee.dir/src/Camera.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/bdpt.dir/build.make CMakeFiles/bdpt.dir/src/Camera.cpp.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/comparison.dir/build.make CMakeFiles/comparison.dir/src/Camera.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/compPT.dir/build.make CMakeFiles/compPT.dir/src/Camera.cpp.s
 .PHONY : src/Camera.cpp.s
 
 src/CosWeightPT.o: src/CosWeightPT.cpp.o
@@ -298,7 +348,7 @@ src/Ray.cpp.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/cosweight.dir/build.make CMakeFiles/cosweight.dir/src/Ray.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/nee.dir/build.make CMakeFiles/nee.dir/src/Ray.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/bdpt.dir/build.make CMakeFiles/bdpt.dir/src/Ray.cpp.o
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/comparison.dir/build.make CMakeFiles/comparison.dir/src/Ray.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/compPT.dir/build.make CMakeFiles/compPT.dir/src/Ray.cpp.o
 .PHONY : src/Ray.cpp.o
 
 src/Ray.i: src/Ray.cpp.i
@@ -310,7 +360,7 @@ src/Ray.cpp.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/cosweight.dir/build.make CMakeFiles/cosweight.dir/src/Ray.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/nee.dir/build.make CMakeFiles/nee.dir/src/Ray.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/bdpt.dir/build.make CMakeFiles/bdpt.dir/src/Ray.cpp.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/comparison.dir/build.make CMakeFiles/comparison.dir/src/Ray.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/compPT.dir/build.make CMakeFiles/compPT.dir/src/Ray.cpp.i
 .PHONY : src/Ray.cpp.i
 
 src/Ray.s: src/Ray.cpp.s
@@ -322,7 +372,7 @@ src/Ray.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/cosweight.dir/build.make CMakeFiles/cosweight.dir/src/Ray.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/nee.dir/build.make CMakeFiles/nee.dir/src/Ray.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/bdpt.dir/build.make CMakeFiles/bdpt.dir/src/Ray.cpp.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/comparison.dir/build.make CMakeFiles/comparison.dir/src/Ray.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/compPT.dir/build.make CMakeFiles/compPT.dir/src/Ray.cpp.s
 .PHONY : src/Ray.cpp.s
 
 src/Raytracing.o: src/Raytracing.cpp.o
@@ -358,7 +408,7 @@ src/Vec3.cpp.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/cosweight.dir/build.make CMakeFiles/cosweight.dir/src/Vec3.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/nee.dir/build.make CMakeFiles/nee.dir/src/Vec3.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/bdpt.dir/build.make CMakeFiles/bdpt.dir/src/Vec3.cpp.o
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/comparison.dir/build.make CMakeFiles/comparison.dir/src/Vec3.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/compPT.dir/build.make CMakeFiles/compPT.dir/src/Vec3.cpp.o
 .PHONY : src/Vec3.cpp.o
 
 src/Vec3.i: src/Vec3.cpp.i
@@ -370,7 +420,7 @@ src/Vec3.cpp.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/cosweight.dir/build.make CMakeFiles/cosweight.dir/src/Vec3.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/nee.dir/build.make CMakeFiles/nee.dir/src/Vec3.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/bdpt.dir/build.make CMakeFiles/bdpt.dir/src/Vec3.cpp.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/comparison.dir/build.make CMakeFiles/comparison.dir/src/Vec3.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/compPT.dir/build.make CMakeFiles/compPT.dir/src/Vec3.cpp.i
 .PHONY : src/Vec3.cpp.i
 
 src/Vec3.s: src/Vec3.cpp.s
@@ -382,7 +432,7 @@ src/Vec3.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/cosweight.dir/build.make CMakeFiles/cosweight.dir/src/Vec3.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/nee.dir/build.make CMakeFiles/nee.dir/src/Vec3.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/bdpt.dir/build.make CMakeFiles/bdpt.dir/src/Vec3.cpp.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/comparison.dir/build.make CMakeFiles/comparison.dir/src/Vec3.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/compPT.dir/build.make CMakeFiles/compPT.dir/src/Vec3.cpp.s
 .PHONY : src/Vec3.cpp.s
 
 src/comparePT.o: src/comparePT.cpp.o
@@ -390,7 +440,7 @@ src/comparePT.o: src/comparePT.cpp.o
 
 # target to build an object file
 src/comparePT.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/comparison.dir/build.make CMakeFiles/comparison.dir/src/comparePT.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/compPT.dir/build.make CMakeFiles/compPT.dir/src/comparePT.cpp.o
 .PHONY : src/comparePT.cpp.o
 
 src/comparePT.i: src/comparePT.cpp.i
@@ -398,7 +448,7 @@ src/comparePT.i: src/comparePT.cpp.i
 
 # target to preprocess a source file
 src/comparePT.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/comparison.dir/build.make CMakeFiles/comparison.dir/src/comparePT.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/compPT.dir/build.make CMakeFiles/compPT.dir/src/comparePT.cpp.i
 .PHONY : src/comparePT.cpp.i
 
 src/comparePT.s: src/comparePT.cpp.s
@@ -406,8 +456,32 @@ src/comparePT.s: src/comparePT.cpp.s
 
 # target to generate assembly for a file
 src/comparePT.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/comparison.dir/build.make CMakeFiles/comparison.dir/src/comparePT.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/compPT.dir/build.make CMakeFiles/compPT.dir/src/comparePT.cpp.s
 .PHONY : src/comparePT.cpp.s
+
+tools/pfm2png.o: tools/pfm2png.cpp.o
+.PHONY : tools/pfm2png.o
+
+# target to build an object file
+tools/pfm2png.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/pfm2png.dir/build.make CMakeFiles/pfm2png.dir/tools/pfm2png.cpp.o
+.PHONY : tools/pfm2png.cpp.o
+
+tools/pfm2png.i: tools/pfm2png.cpp.i
+.PHONY : tools/pfm2png.i
+
+# target to preprocess a source file
+tools/pfm2png.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/pfm2png.dir/build.make CMakeFiles/pfm2png.dir/tools/pfm2png.cpp.i
+.PHONY : tools/pfm2png.cpp.i
+
+tools/pfm2png.s: tools/pfm2png.cpp.s
+.PHONY : tools/pfm2png.s
+
+# target to generate assembly for a file
+tools/pfm2png.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/pfm2png.dir/build.make CMakeFiles/pfm2png.dir/tools/pfm2png.cpp.s
+.PHONY : tools/pfm2png.cpp.s
 
 # Help Target
 help:
@@ -418,10 +492,15 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... bdpt"
-	@echo "... comparison"
+	@echo "... comp2"
+	@echo "... compPT"
 	@echo "... cosweight"
 	@echo "... nee"
+	@echo "... pfm2png"
 	@echo "... raytracing"
+	@echo "... diff/Gaussian_Blur.o"
+	@echo "... diff/Gaussian_Blur.i"
+	@echo "... diff/Gaussian_Blur.s"
 	@echo "... src/BDPT.o"
 	@echo "... src/BDPT.i"
 	@echo "... src/BDPT.s"
@@ -446,6 +525,9 @@ help:
 	@echo "... src/comparePT.o"
 	@echo "... src/comparePT.i"
 	@echo "... src/comparePT.s"
+	@echo "... tools/pfm2png.o"
+	@echo "... tools/pfm2png.i"
+	@echo "... tools/pfm2png.s"
 .PHONY : help
 
 

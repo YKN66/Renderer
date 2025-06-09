@@ -39,28 +39,23 @@ add_executable(bdpt
    	 src/Ray.cpp
    	 src/Camera.cpp
 )
-add_executable(comparison
+add_executable(compPT
 	 src/comparePT.cpp
 	 src/Vec3.cpp
    	 src/Ray.cpp
    	 src/Camera.cpp
 )
+add_executable(comp2
+	 diff/Gaussian_Blur.cpp
+)
+add_executable(pfm2png
+	 tools/pfm2png.cpp
+)
+
 
 # stb を置いたディレクトリを追加
 add_library(stb INTERFACE)
 target_include_directories(stb INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/external)
 
-target_link_libraries(raytracing PRIVATE stb)
-target_compile_definitions(raytracing PRIVATE STB_IMAGE_WRITE_IMPLEMENTATION)
-
-target_link_libraries(cosweight PRIVATE stb)
-target_compile_definitions(cosweight PRIVATE STB_IMAGE_WRITE_IMPLEMENTATION)
-
-target_link_libraries(nee PRIVATE stb)
-target_compile_definitions(nee PRIVATE STB_IMAGE_WRITE_IMPLEMENTATION)
-
-target_link_libraries(bdpt PRIVATE stb)
-target_compile_definitions(bdpt PRIVATE STB_IMAGE_WRITE_IMPLEMENTATION)
-
-target_link_libraries(comparison PRIVATE stb)
-target_compile_definitions(comparison PRIVATE STB_IMAGE_WRITE_IMPLEMENTATION)
+target_link_libraries(pfm2png PRIVATE stb)
+target_compile_definitions(pfm2png PRIVATE STB_IMAGE_WRITE_IMPLEMENTATION)

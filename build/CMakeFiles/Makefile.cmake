@@ -60,5 +60,7 @@ set(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/cosweight.dir/DependInfo.cmake"
   "CMakeFiles/nee.dir/DependInfo.cmake"
   "CMakeFiles/bdpt.dir/DependInfo.cmake"
-  "CMakeFiles/comparison.dir/DependInfo.cmake"
+  "CMakeFiles/compPT.dir/DependInfo.cmake"
+  "CMakeFiles/comp2.dir/DependInfo.cmake"
+  "CMakeFiles/pfm2png.dir/DependInfo.cmake"
   )

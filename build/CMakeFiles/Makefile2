@@ -67,7 +67,9 @@ all: CMakeFiles/raytracing.dir/all
 all: CMakeFiles/cosweight.dir/all
 all: CMakeFiles/nee.dir/all
 all: CMakeFiles/bdpt.dir/all
-all: CMakeFiles/comparison.dir/all
+all: CMakeFiles/compPT.dir/all
+all: CMakeFiles/comp2.dir/all
+all: CMakeFiles/pfm2png.dir/all
 .PHONY : all
 
 # The main recursive "codegen" target.
@@ -75,7 +77,9 @@ codegen: CMakeFiles/raytracing.dir/codegen
 codegen: CMakeFiles/cosweight.dir/codegen
 codegen: CMakeFiles/nee.dir/codegen
 codegen: CMakeFiles/bdpt.dir/codegen
-codegen: CMakeFiles/comparison.dir/codegen
+codegen: CMakeFiles/compPT.dir/codegen
+codegen: CMakeFiles/comp2.dir/codegen
+codegen: CMakeFiles/pfm2png.dir/codegen
 .PHONY : codegen
 
 # The main recursive "preinstall" target.
@@ -87,7 +91,9 @@ clean: CMakeFiles/raytracing.dir/clean
 clean: CMakeFiles/cosweight.dir/clean
 clean: CMakeFiles/nee.dir/clean
 clean: CMakeFiles/bdpt.dir/clean
-clean: CMakeFiles/comparison.dir/clean
+clean: CMakeFiles/compPT.dir/clean
+clean: CMakeFiles/comp2.dir/clean
+clean: CMakeFiles/pfm2png.dir/clean
 .PHONY : clean
 
 #=============================================================================
@@ -97,7 +103,7 @@ clean: CMakeFiles/comparison.dir/clean
 CMakeFiles/raytracing.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/raytracing.dir/build.make CMakeFiles/raytracing.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/raytracing.dir/build.make CMakeFiles/raytracing.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/yuki/Documents/rendering/bdpt/build/CMakeFiles --progress-num=21,22,23,24,25 "Built target raytracing"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/yuki/Documents/rendering/bdpt/build/CMakeFiles --progress-num=25,26,27,28,29 "Built target raytracing"
 .PHONY : CMakeFiles/raytracing.dir/all
 
 # Build rule for subdir invocation for target.
@@ -114,7 +120,7 @@ raytracing: CMakeFiles/raytracing.dir/rule
 # codegen rule for target.
 CMakeFiles/raytracing.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/raytracing.dir/build.make CMakeFiles/raytracing.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/yuki/Documents/rendering/bdpt/build/CMakeFiles --progress-num=21,22,23,24,25 "Finished codegen for target raytracing"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/yuki/Documents/rendering/bdpt/build/CMakeFiles --progress-num=25,26,27,28,29 "Finished codegen for target raytracing"
 .PHONY : CMakeFiles/raytracing.dir/codegen
 
 # clean rule for target.
@@ -129,7 +135,7 @@ CMakeFiles/raytracing.dir/clean:
 CMakeFiles/cosweight.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/cosweight.dir/build.make CMakeFiles/cosweight.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/cosweight.dir/build.make CMakeFiles/cosweight.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/yuki/Documents/rendering/bdpt/build/CMakeFiles --progress-num=11,12,13,14,15 "Built target cosweight"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/yuki/Documents/rendering/bdpt/build/CMakeFiles --progress-num=13,14,15,16,17 "Built target cosweight"
 .PHONY : CMakeFiles/cosweight.dir/all
 
 # Build rule for subdir invocation for target.
@@ -146,7 +152,7 @@ cosweight: CMakeFiles/cosweight.dir/rule
 # codegen rule for target.
 CMakeFiles/cosweight.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/cosweight.dir/build.make CMakeFiles/cosweight.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/yuki/Documents/rendering/bdpt/build/CMakeFiles --progress-num=11,12,13,14,15 "Finished codegen for target cosweight"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/yuki/Documents/rendering/bdpt/build/CMakeFiles --progress-num=13,14,15,16,17 "Finished codegen for target cosweight"
 .PHONY : CMakeFiles/cosweight.dir/codegen
 
 # clean rule for target.
@@ -161,7 +167,7 @@ CMakeFiles/cosweight.dir/clean:
 CMakeFiles/nee.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/nee.dir/build.make CMakeFiles/nee.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/nee.dir/build.make CMakeFiles/nee.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/yuki/Documents/rendering/bdpt/build/CMakeFiles --progress-num=16,17,18,19,20 "Built target nee"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/yuki/Documents/rendering/bdpt/build/CMakeFiles --progress-num=18,19,20,21,22 "Built target nee"
 .PHONY : CMakeFiles/nee.dir/all
 
 # Build rule for subdir invocation for target.
@@ -178,7 +184,7 @@ nee: CMakeFiles/nee.dir/rule
 # codegen rule for target.
 CMakeFiles/nee.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/nee.dir/build.make CMakeFiles/nee.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/yuki/Documents/rendering/bdpt/build/CMakeFiles --progress-num=16,17,18,19,20 "Finished codegen for target nee"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/yuki/Documents/rendering/bdpt/build/CMakeFiles --progress-num=18,19,20,21,22 "Finished codegen for target nee"
 .PHONY : CMakeFiles/nee.dir/codegen
 
 # clean rule for target.
@@ -219,36 +225,100 @@ CMakeFiles/bdpt.dir/clean:
 .PHONY : CMakeFiles/bdpt.dir/clean
 
 #=============================================================================
-# Target rules for target CMakeFiles/comparison.dir
+# Target rules for target CMakeFiles/compPT.dir
 
 # All Build rule for target.
-CMakeFiles/comparison.dir/all:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/comparison.dir/build.make CMakeFiles/comparison.dir/depend
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/comparison.dir/build.make CMakeFiles/comparison.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/yuki/Documents/rendering/bdpt/build/CMakeFiles --progress-num=6,7,8,9,10 "Built target comparison"
-.PHONY : CMakeFiles/comparison.dir/all
+CMakeFiles/compPT.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/compPT.dir/build.make CMakeFiles/compPT.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/compPT.dir/build.make CMakeFiles/compPT.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/yuki/Documents/rendering/bdpt/build/CMakeFiles --progress-num=8,9,10,11,12 "Built target compPT"
+.PHONY : CMakeFiles/compPT.dir/all
 
 # Build rule for subdir invocation for target.
-CMakeFiles/comparison.dir/rule: cmake_check_build_system
+CMakeFiles/compPT.dir/rule: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/yuki/Documents/rendering/bdpt/build/CMakeFiles 5
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/comparison.dir/all
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/compPT.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/yuki/Documents/rendering/bdpt/build/CMakeFiles 0
-.PHONY : CMakeFiles/comparison.dir/rule
+.PHONY : CMakeFiles/compPT.dir/rule
 
 # Convenience name for target.
-comparison: CMakeFiles/comparison.dir/rule
-.PHONY : comparison
+compPT: CMakeFiles/compPT.dir/rule
+.PHONY : compPT
 
 # codegen rule for target.
-CMakeFiles/comparison.dir/codegen:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/comparison.dir/build.make CMakeFiles/comparison.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/yuki/Documents/rendering/bdpt/build/CMakeFiles --progress-num=6,7,8,9,10 "Finished codegen for target comparison"
-.PHONY : CMakeFiles/comparison.dir/codegen
+CMakeFiles/compPT.dir/codegen:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/compPT.dir/build.make CMakeFiles/compPT.dir/codegen
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/yuki/Documents/rendering/bdpt/build/CMakeFiles --progress-num=8,9,10,11,12 "Finished codegen for target compPT"
+.PHONY : CMakeFiles/compPT.dir/codegen
 
 # clean rule for target.
-CMakeFiles/comparison.dir/clean:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/comparison.dir/build.make CMakeFiles/comparison.dir/clean
-.PHONY : CMakeFiles/comparison.dir/clean
+CMakeFiles/compPT.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/compPT.dir/build.make CMakeFiles/compPT.dir/clean
+.PHONY : CMakeFiles/compPT.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/comp2.dir
+
+# All Build rule for target.
+CMakeFiles/comp2.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/comp2.dir/build.make CMakeFiles/comp2.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/comp2.dir/build.make CMakeFiles/comp2.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/yuki/Documents/rendering/bdpt/build/CMakeFiles --progress-num=6,7 "Built target comp2"
+.PHONY : CMakeFiles/comp2.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/comp2.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/yuki/Documents/rendering/bdpt/build/CMakeFiles 2
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/comp2.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/yuki/Documents/rendering/bdpt/build/CMakeFiles 0
+.PHONY : CMakeFiles/comp2.dir/rule
+
+# Convenience name for target.
+comp2: CMakeFiles/comp2.dir/rule
+.PHONY : comp2
+
+# codegen rule for target.
+CMakeFiles/comp2.dir/codegen:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/comp2.dir/build.make CMakeFiles/comp2.dir/codegen
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/yuki/Documents/rendering/bdpt/build/CMakeFiles --progress-num=6,7 "Finished codegen for target comp2"
+.PHONY : CMakeFiles/comp2.dir/codegen
+
+# clean rule for target.
+CMakeFiles/comp2.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/comp2.dir/build.make CMakeFiles/comp2.dir/clean
+.PHONY : CMakeFiles/comp2.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/pfm2png.dir
+
+# All Build rule for target.
+CMakeFiles/pfm2png.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/pfm2png.dir/build.make CMakeFiles/pfm2png.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/pfm2png.dir/build.make CMakeFiles/pfm2png.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/yuki/Documents/rendering/bdpt/build/CMakeFiles --progress-num=23,24 "Built target pfm2png"
+.PHONY : CMakeFiles/pfm2png.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/pfm2png.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/yuki/Documents/rendering/bdpt/build/CMakeFiles 2
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/pfm2png.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/yuki/Documents/rendering/bdpt/build/CMakeFiles 0
+.PHONY : CMakeFiles/pfm2png.dir/rule
+
+# Convenience name for target.
+pfm2png: CMakeFiles/pfm2png.dir/rule
+.PHONY : pfm2png
+
+# codegen rule for target.
+CMakeFiles/pfm2png.dir/codegen:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/pfm2png.dir/build.make CMakeFiles/pfm2png.dir/codegen
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/yuki/Documents/rendering/bdpt/build/CMakeFiles --progress-num=23,24 "Finished codegen for target pfm2png"
+.PHONY : CMakeFiles/pfm2png.dir/codegen
+
+# clean rule for target.
+CMakeFiles/pfm2png.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/pfm2png.dir/build.make CMakeFiles/pfm2png.dir/clean
+.PHONY : CMakeFiles/pfm2png.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.

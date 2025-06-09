@@ -2,6 +2,8 @@
 /Users/yuki/Documents/rendering/bdpt/build/CMakeFiles/cosweight.dir
 /Users/yuki/Documents/rendering/bdpt/build/CMakeFiles/nee.dir
 /Users/yuki/Documents/rendering/bdpt/build/CMakeFiles/bdpt.dir
-/Users/yuki/Documents/rendering/bdpt/build/CMakeFiles/comparison.dir
+/Users/yuki/Documents/rendering/bdpt/build/CMakeFiles/compPT.dir
+/Users/yuki/Documents/rendering/bdpt/build/CMakeFiles/comp2.dir
+/Users/yuki/Documents/rendering/bdpt/build/CMakeFiles/pfm2png.dir
 /Users/yuki/Documents/rendering/bdpt/build/CMakeFiles/edit_cache.dir
 /Users/yuki/Documents/rendering/bdpt/build/CMakeFiles/rebuild_cache.dir

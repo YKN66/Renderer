@@ -1,13 +1,44 @@
 import cv2
+import re
+import sys
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.ndimage import gaussian_filter
 
 
-# img_A = cv2.imread('../build/results/cos.png', cv2.IMREAD_UNCHANGED).astype(np.float32)
-# img_B = cv2.imread('../build/results/nee.png', cv2.IMREAD_UNCHANGED).astype(np.float32)
-img_A = cv2.imread('../build/compare/length_2/cos.png', cv2.IMREAD_UNCHANGED).astype(np.float32)
-img_B = cv2.imread('../build/compare/length_2/bdpt.png', cv2.IMREAD_UNCHANGED).astype(np.float32)
+def load_pfm(path):
+    with open(path, 'rb') as f:
+        # 1) ヘッダ
+        header = f.readline().decode('ascii').rstrip()
+        color = header == 'PF'          # RGB = 'PF', グレースケール = 'Pf'
+        if header not in ('PF', 'Pf'):
+            raise ValueError(f'Not a PFM file: {path}')
+
+        # 2) コメント行を飛ばしつつサイズを読む
+        dims_line = f.readline().decode('ascii')
+        while dims_line.startswith('#'):
+            dims_line = f.readline().decode('ascii')
+        w, h = map(int, re.findall(r'\d+', dims_line))
+
+        # 3) スケール（負ならリトルエンディアン）
+        scale = float(f.readline().decode('ascii').rstrip())
+        endian = '<' if scale < 0 else '>'
+        data = np.fromfile(f, endian + 'f4')   # float32
+
+    # 4) 配列整形
+    shape = (h, w, 3) if color else (h, w)
+    data = np.reshape(data, shape)             # 1 本で読み込んで reshape
+    data = np.flipud(data)                     # 上下反転で通常の向きへ
+    return data
+
+
+# img_A = load_pfm('../build/results/cos.pfm')
+# img_B = load_pfm('../build/results/nee.pfm')
+
+img_A = cv2.imread('../build/results/cos.pfm', cv2.IMREAD_UNCHANGED).astype(np.float32)
+img_B = cv2.imread('../build/results/nee.pfm', cv2.IMREAD_UNCHANGED).astype(np.float32)
+# img_A = cv2.imread('../build/compare/length_2/cos.png', cv2.IMREAD_UNCHANGED).astype(np.float32)
+# img_B = cv2.imread('../build/compare/length_2/bdpt.png', cv2.IMREAD_UNCHANGED).astype(np.float32)
 
 print(f"img_A.shape: {img_A.shape}")
 print(f"img_B.shape: {img_B.shape}")
