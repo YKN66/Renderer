@@ -138,21 +138,27 @@ cmake ..
 cmake --build .
 
 ### レイトレーシングでレンダリング
-./build/raytracing             # 出力 → results/rt.png
+./build/raytracing             # 出力 → results/rt.pfm
 
 ### コサインウェイトサンプリングを用いたパストレーシングでレンダリング
-./build/cosweight              # 出力 → results/cos.png
+./build/cosweight              # 出力 → results/cos.pfm
 
 ### NEEを用いたパストレーシングでレンダリング
-./build/NEE                    # 出力 → results/nee.png
+./build/NEE                    # 出力 → results/nee.pfm
 
 ### BDPTでレンダリング(実装中)
-./build/bdpt                   # 出力 → results/bdpt.png
+./build/bdpt                   # 出力 → results/bdpt.pfm
 
 ### BDPT でパス長毎にレンダリング
 ./build/comparePT              # 出力 → compare/length_*/
 
-### レンダリング結果の比較
+### pfmファイルをpngファイルに変換
+./pfm2png [input.pfm] [output.png]
+
+### レンダリング結果の比較(pfm)
+./diff [a.pfm] [b.pfm] [gaussian_sigma] [output.pfm]
+
+### レンダリング結果の比較(png)
 cd ../diff
 ./setup.sh                     # 仮想環境構築
 source venv/bin/activate       # 仮想環境有効化
