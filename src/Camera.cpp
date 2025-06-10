@@ -3,7 +3,8 @@
 #include "Ray.h"
 #include <cmath>
 
-Camera::Camera(Vec3 lookFrom, Vec3 lookAt, Vec3 vup, float fov_dg, float aspect) {
+Camera::Camera(Vec3 lookFrom, Vec3 lookAt, Vec3 vup, float fov_dg, float aspect, int width, int height) 
+       : width(width), height(height){
     float theta = fov_dg * M_PI / 180.0f;
     float h = std::tan(theta / 2);
     viewport_height = 2.0f * h;

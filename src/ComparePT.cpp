@@ -75,7 +75,7 @@ int main() {
                             float u = (i + random_float()) / (image_width - 1);
                             float v = (j + random_float()) / (image_height - 1);
                                 
-                            color += bdpt_render_n(camera, scene, u, v, s, t);
+                            color += bdpt_render(camera, scene, u, v, s, t);
                         }
                         // color /= bdpt_sample_num;
                         fb[j * image_width + i] += color;

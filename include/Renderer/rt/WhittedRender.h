@@ -34,13 +34,16 @@ Vec3 whitted_render(const Ray& r, const std::vector<std::shared_ptr<Object>>& sc
         if(!rect) continue;
 
         Vec3 light_pos = sample_light_rectangle(rect->get_center(), rect->get_u(), rect->get_v());
-        Vec3 wi = (light_pos - x).normalize();
-        float dist = (light_pos - x).length();
-        float dist2 = (light_pos - x).length_squared();
+        Vec3 shadow_origin = x + N * epsilon;
+        Vec3 wi_vec       = light_pos - shadow_origin;
+        float dist2       = wi_vec.length_squared();
+        float dist        = std::sqrt(dist2);
+        Vec3 wi           = wi_vec / dist;
 
-        Ray shadow_ray(x + N * epsilon, wi);
+        Ray shadow_ray(shadow_origin, wi);
         bool in_shadow = false;
         for (auto& obj : scene) {
+            if (obj->is_light()) continue;
             float t;
             if (obj->hit(shadow_ray, epsilon, dist - epsilon, t)) {
                 in_shadow = true;

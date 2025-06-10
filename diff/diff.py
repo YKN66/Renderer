@@ -6,37 +6,8 @@ import matplotlib.pyplot as plt
 from scipy.ndimage import gaussian_filter
 
 
-def load_pfm(path):
-    with open(path, 'rb') as f:
-        # 1) ヘッダ
-        header = f.readline().decode('ascii').rstrip()
-        color = header == 'PF'          # RGB = 'PF', グレースケール = 'Pf'
-        if header not in ('PF', 'Pf'):
-            raise ValueError(f'Not a PFM file: {path}')
-
-        # 2) コメント行を飛ばしつつサイズを読む
-        dims_line = f.readline().decode('ascii')
-        while dims_line.startswith('#'):
-            dims_line = f.readline().decode('ascii')
-        w, h = map(int, re.findall(r'\d+', dims_line))
-
-        # 3) スケール（負ならリトルエンディアン）
-        scale = float(f.readline().decode('ascii').rstrip())
-        endian = '<' if scale < 0 else '>'
-        data = np.fromfile(f, endian + 'f4')   # float32
-
-    # 4) 配列整形
-    shape = (h, w, 3) if color else (h, w)
-    data = np.reshape(data, shape)             # 1 本で読み込んで reshape
-    data = np.flipud(data)                     # 上下反転で通常の向きへ
-    return data
-
-
-# img_A = load_pfm('../build/results/cos.pfm')
-# img_B = load_pfm('../build/results/nee.pfm')
-
-img_A = cv2.imread('../build/results/cos.pfm', cv2.IMREAD_UNCHANGED).astype(np.float32)
-img_B = cv2.imread('../build/results/nee.pfm', cv2.IMREAD_UNCHANGED).astype(np.float32)
+img_A = cv2.imread('../build/results/cos.png', cv2.IMREAD_UNCHANGED).astype(np.float32)
+img_B = cv2.imread('../build/results/nee.png', cv2.IMREAD_UNCHANGED).astype(np.float32)
 # img_A = cv2.imread('../build/compare/length_2/cos.png', cv2.IMREAD_UNCHANGED).astype(np.float32)
 # img_B = cv2.imread('../build/compare/length_2/bdpt.png', cv2.IMREAD_UNCHANGED).astype(np.float32)
 
@@ -52,21 +23,21 @@ abs_diff_gaussian = np.abs(diff_gaussian)
 plt.imshow(diff, vmin=0, vmax=1)
 plt.axis('off')
 plt.tight_layout()
-plt.savefig('diff.png', dpi=200)
+plt.savefig('./results/diff.png', dpi=200)
 plt.show()
 plt.close()
 
 plt.imshow(diff_gaussian, vmin=0, vmax=1)
 plt.axis('off')
 plt.tight_layout()
-plt.savefig('diff_gaussian.png', dpi=200)
+plt.savefig('./results/diff_gaussian.png', dpi=200)
 plt.show()
 plt.close()
 
 plt.imshow(abs_diff_gaussian, vmin=0, vmax=1)
 plt.axis('off')
 plt.tight_layout()
-plt.savefig('abs_diff_gaussian.png', dpi=200)
+plt.savefig('./results/abs_diff_gaussian.png', dpi=200)
 plt.show()
 plt.close()
 
@@ -86,21 +57,21 @@ plt.close()
 # plt.imshow(diff_r,  vmin=0, vmax=1)
 # plt.axis('off')
 # plt.tight_layout()
-# plt.savefig('diff_r.png', dpi=200)
+# plt.savefig('./results/diff_r.png', dpi=200)
 # plt.show()
 # plt.close()
 # plt.gray()
 # plt.imshow(diff_g, vmin=0, vmax=1)
 # plt.axis('off')
 # plt.tight_layout()
-# plt.savefig('diff_g.png', dpi=200)
+# plt.savefig('./results/diff_g.png', dpi=200)
 # plt.show()
 # plt.close()
 # plt.gray()
 # plt.imshow(diff_b,  vmin=0, vmax=1)
 # plt.axis('off')
 # plt.tight_layout()
-# plt.savefig('diff_b.png', dpi=200)
+# plt.savefig('./results/diff_b.png', dpi=200)
 # plt.show()
 # plt.close()
 
@@ -108,21 +79,21 @@ plt.close()
 # plt.imshow(diff_r_gauss,  vmin=0, vmax=1)
 # plt.axis('off')
 # plt.tight_layout()
-# plt.savefig('diff_r_gauss.png', dpi=200)
+# plt.savefig('./results/diff_r_gauss.png', dpi=200)
 # plt.show()
 # plt.close()
 # plt.gray()
 # plt.imshow(diff_g_gauss,  vmin=0, vmax=1)
 # plt.axis('off')
 # plt.tight_layout()
-# plt.savefig('diff_g_gauss.png', dpi=200)
+# plt.savefig('./results/diff_g_gauss.png', dpi=200)
 # plt.show()
 # plt.close()
 # plt.gray()
 # plt.imshow(diff_b_gauss,  vmin=0, vmax=1)
 # plt.axis('off')
 # plt.tight_layout()
-# plt.savefig('diff_b_gauss.png', dpi=200)
+# plt.savefig('./results/diff_b_gauss.png', dpi=200)
 # plt.show()
 # plt.close()
 
@@ -130,20 +101,20 @@ plt.close()
 # plt.imshow(abs_diff_r_gauss,  vmin=0, vmax=1)
 # plt.axis('off')
 # plt.tight_layout()
-# plt.savefig('abs_diff_r_gauss.png', dpi=200)
+# plt.savefig('./results/abs_diff_r_gauss.png', dpi=200)
 # plt.show()
 # plt.close()
 # plt.gray()
 # plt.imshow(abs_diff_g_gauss,  vmin=0, vmax=1)
 # plt.axis('off')
 # plt.tight_layout()
-# plt.savefig('abs_diff_g_gauss.png', dpi=200)
+# plt.savefig('./results/abs_diff_g_gauss.png', dpi=200)
 # plt.show()
 # plt.close()
 # plt.gray()
 # plt.imshow(abs_diff_b_gauss,  vmin=0, vmax=1)
 # plt.axis('off')
 # plt.tight_layout()
-# plt.savefig('abs_diff_b_gauss.png', dpi=200)
+# plt.savefig('./results/abs_diff_b_gauss.png', dpi=200)
 # plt.show()
 # plt.close()

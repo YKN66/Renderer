@@ -45,8 +45,17 @@ add_executable(compPT
    	 src/Ray.cpp
    	 src/Camera.cpp
 )
-add_executable(comp2
+add_executable(subtract
+	 diff/diff.cpp
+)
+add_executable(gauss
 	 diff/Gaussian_Blur.cpp
+)
+add_executable(abs
+	 diff/abs.cpp
+)
+add_executable(diff
+	 diff/compare.cpp
 )
 add_executable(pfm2png
 	 tools/pfm2png.cpp

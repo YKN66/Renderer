@@ -47,24 +47,45 @@ Vec3 nee_render(const Ray& r, const std::vector<std::shared_ptr<Object>>& scene,
 
         for(const auto& light : scene){
             auto rect = std::dynamic_pointer_cast<Rectangle>(light);
-            if(!rect) continue;
-            
+            // if(!rect) continue;
+            if(!rect || !rect->is_light()) continue;
+
+
             Vec3 light_pos = sample_light_rectangle(rect->get_center(), rect->get_u(), rect->get_v());
-            Vec3 wi = (light_pos - x).normalize();
-            float dist = (light_pos - x).length();
-            float dist2 = dist * dist;
+            Vec3 shadow_origin = x + N * epsilon;
+            Vec3 wi_vec       = light_pos - shadow_origin;
+            float dist2       = wi_vec.length_squared();
+            float dist        = std::sqrt(dist2);
+            Vec3 wi           = wi_vec / dist;
 
-            Ray shadow_ray(x + N * epsilon, wi);
+            Ray shadow_ray(shadow_origin, wi);
             bool in_shadow = false;
-
-            for(const auto& obj : scene){
+            for (auto& obj : scene) {
+                if(obj->is_light()) continue;
                 float t;
-                if(obj->hit(shadow_ray, epsilon, dist - epsilon, t) && !obj->is_light()){
+                if (obj->hit(shadow_ray, epsilon, dist - epsilon, t)) {
                     in_shadow = true;
                     break;
                 }
             }
             if(in_shadow) continue;
+            
+            // Vec3 light_pos = sample_light_rectangle(rect->get_center(), rect->get_u(), rect->get_v());
+            // Vec3 wi = (light_pos - x).normalize();
+            // float dist = (light_pos - x).length();
+            // float dist2 = dist * dist;
+
+            // Ray shadow_ray(x + N * epsilon, wi);
+            // bool in_shadow = false;
+
+            // for(const auto& obj : scene){
+            //     float t;
+            //     if(obj->hit(shadow_ray, epsilon, dist - epsilon, t) && !obj->is_light()){
+            //         in_shadow = true;
+            //         break;
+            //     }
+            // }
+            // if(in_shadow) continue;
 
             Vec3 brdf = hit_object->get_material()->evaluate(N, wi, wo);
             Vec3 Le = light->get_material()->get_emission();
@@ -73,17 +94,21 @@ Vec3 nee_render(const Ray& r, const std::vector<std::shared_ptr<Object>>& scene,
             float G = cos_theta * cos_alpha / dist2;
             float area = rect->get_area();
 
-            radiance += throughput * (brdf * Le * G * area);
+            float pdfA = 1.0f / area;
+            float weight    = (cos_theta * cos_alpha) / (dist2 * pdfA);
+
+            // radiance += throughput * (brdf * Le * G * area);
+            radiance += throughput * brdf * Le * weight;
 
         }
 
         float pdf;
         Vec3 wi = hit_object->get_material()->sample(N, wo, pdf);
-        if(pdf <= 0) break;
+        if(pdf <= 0.0f) break;
 
-        Vec3 brdf_val = hit_object->get_material()->evaluate(N, wi, wo);
+        Vec3 brdf = hit_object->get_material()->evaluate(N, wi, wo);
         float cos_out = std::max(0.0f, N.dot(wi));
-        throughput *= brdf_val * cos_out / pdf;
+        throughput *= brdf * cos_out / pdf;
 
         ray = Ray(x + N * epsilon, wi);
             
