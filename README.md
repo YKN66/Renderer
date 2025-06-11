@@ -175,7 +175,7 @@ deactivate                     # 仮想環境終了
 | ![cos](docs/images/cos.png) | コサインウェイトサンプリングによるパストレーシングの結果 |
 | ![nee](docs/images/nee.png) | NEEを用いたパストレーシングの結果 |
 | ![bdpt](docs/images/bdpt.png) | 双方向パストレーシングの結果 |
-| ![diff](docs/images/abs_diff_gaussian.png) | `diff.py` による差分ヒートマップ |
+| ![diff](docs/images/diff.png) | `compare.cpp` による差分ヒートマップ |
 
 ## 検証フロー<a name="検証"></a>
 同一シーンかつ同一のパス長においては、理論上すべてのレンダリング手法が導き出す放射輝度の期待値は一致するはずです。したがって、レンダリング結果同士の差分画像は理想的には**完全な白（差分ゼロ）**となります。
