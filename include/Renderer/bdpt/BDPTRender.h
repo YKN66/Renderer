@@ -49,7 +49,7 @@ Vec3 bdpt_render(const Camera& camera, const std::vector<std::shared_ptr<Object>
 
         float pdf_dir = (i == 1) ? std::max(v0.pdf_rev, 1e-6f) : std::max(v0.pdf_fwd, 1e-6f);
 
-        beta_l[i] = beta_l[i-1] * fs * cos / std::max(v0.pdf_fwd, 1e-6f);
+        // beta_l[i] = beta_l[i-1] * fs * cos / std::max(v0.pdf_fwd, 1e-6f);
         beta_l[i] = beta_l[i-1] * fs * cos / pdf_dir;
     }
 
