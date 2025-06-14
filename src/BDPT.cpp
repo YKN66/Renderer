@@ -14,8 +14,8 @@
 int main() {
     const int image_width = 800;
     const int image_height = 400;
-    const int sample_num = 6;
-    const int max_path_len = 5;
+    const int sample_num = 3;
+    const int max_path_len = 4;
 
     std::vector<std::shared_ptr<Object>> scene;
     Camera camera = controll_scene(image_width, image_height, scene);
@@ -24,14 +24,14 @@ int main() {
     std::vector<Vec3> final_fb(image_width * image_height, Vec3(0.0f, 0.0f, 0.0f));
 
 
-    for (int path_len = 1; path_len <= max_path_len; ++path_len) {
+    for (int path_len = 2; path_len <= max_path_len; ++path_len) {
         std::cout << "Rendering path length " << path_len << std::endl;
         
         std::ostringstream path_dir;
         path_dir << "bdpt_results/length_" << path_len;
         std::filesystem::create_directories(path_dir.str());
 
-        for (int s = 0; s <= path_len + 1; ++s) {
+        for (int s = 2; s <= path_len + 1; ++s) {
             int t = path_len + 1 - s;
 
             std::cout << "  Rendering (s=" << s << ", t=" << t << ")..." << std::endl;

@@ -15,29 +15,25 @@ Vec3 bdpt_render(const Camera& camera, const std::vector<std::shared_ptr<Object>
     auto c_path = generate_camera_subpath(camera, scene, u, v, max_depth);
     auto l_path = generate_light_subpath(scene, max_depth);
 
-    // std::cout << "c_path : "<< c_path.size() <<"\n";
-    // std::cout << "l_path : "<< l_path.size() <<"\n";
+
 
     Vec3 radiance(0.0f, 0.0f, 0.0f);
 
     std::vector<Vec3> beta_c(c_path.size(), Vec3(1.0f, 1.0f, 1.0f));
     for (size_t i = 1; i < c_path.size(); ++i) {
         const auto& v0 = c_path[i-1];
-        const auto& v1 = c_path[i];
-        Vec3 d = (v1.x - v0.x).normalize();
-        float cos = std::max(0.0f, v0.N.dot(d));
-        Vec3 fs = v0.brdf->evaluate(v0.N, d, v0.wi);
+        float cos = std::max(0.0f, v0.N.dot(v0.wi));
+        Vec3 fs = v0.brdf->evaluate(v0.N, v0.wi, v0.wo);
         beta_c[i] = beta_c[i-1] * fs * cos / std::max(v0.pdf_fwd, 1e-6f);
-
-        // std::cout << "cos : "<< cos <<"\n";
-        // std::cout << "fs = ("<< fs.x <<", "<< fs.y <<", "<< fs.z <<")\n";
-        // std::cout << "beta_c[i-1] = ("<< beta_c[i-1].x <<", "<< beta_c[i-1].y <<", "<< beta_c[i-1].z <<")\n\n";
     }
 
     std::vector<Vec3> beta_l(l_path.size(), Vec3(1.0f, 1.0f, 1.0f));
     if (!l_path.empty()) {
-        // beta_l[0] = l_path[0].brdf->get_emission();
-        beta_l[0] = l_path[0].brdf->get_emission() / std::max(l_path[0].pdf_fwd, 1e-6f);
+        const auto& v0 = l_path[0];
+        float cos0 = std::max(0.0f, v0.N.dot(-v0.wi));
+        // beta_l[0] = v0.brdf->get_emission() * cos0 / std::max(v0.pdf_area * v0.pdf_fwd, 1e-6f);
+        beta_l[0] = v0.brdf->get_emission() / std::max(v0.pdf_area, 1e-6f);
+        // beta_l[0] = v0.brdf->get_emission();
     }
 
     for (size_t i = 1; i < l_path.size(); ++i) {
@@ -47,10 +43,8 @@ Vec3 bdpt_render(const Camera& camera, const std::vector<std::shared_ptr<Object>
         float cos = std::max(0.0f, v0.N.dot(d));
         Vec3 fs = v0.is_light ? Vec3(1.0f, 1.0f, 1.0f): v0.brdf->evaluate(v0.N, d, v0.wi);
 
-        float pdf_dir = (i == 1) ? std::max(v0.pdf_rev, 1e-6f) : std::max(v0.pdf_fwd, 1e-6f);
+        beta_l[i] = beta_l[i-1] * fs * cos / std::max(v0.pdf_fwd, 1e-6f);
 
-        // beta_l[i] = beta_l[i-1] * fs * cos / std::max(v0.pdf_fwd, 1e-6f);
-        beta_l[i] = beta_l[i-1] * fs * cos / pdf_dir;
     }
 
 
@@ -119,7 +113,7 @@ inline void accumulate_light_only(const std::vector<PathVertex>& l_path, const s
     if(cos_cam == 0.0f || cos_l == 0.0f) return;
 
     float G = (cos_cam * cos_l) / dist2;
-    Vec3 fs = v.is_light ? Vec3(1.0f, 1.0f, 1.0f) : v.brdf->evaluate(v.N, -dir, v.wi);
+    Vec3 fs = v.is_light ? v.brdf->get_emission() : v.brdf->evaluate(v.N, -dir, v.wi);
     Vec3 contribute = beta_l[idx] * G * fs;
     fb[py * W + px] += contribute;
 }
@@ -145,7 +139,7 @@ inline void accumulate_eye_only(const Camera& camera, const std::vector<PathVert
     if (cos_cam == 0.0f || cos_l == 0.0f) return;
     float G = cos_cam * cos_l / dist2;
 
-    Vec3 fs = v.is_light ? Vec3(1.0f, 1.0f, 1.0f) : v.brdf->evaluate(v.N, -dir, v.wi);
+    Vec3 fs = v.is_light ? v.brdf->get_emission() : v.brdf->evaluate(v.N, -dir, v.wi);
 
     Vec3 contrib = beta_l[t - 1] * fs * G;
 

@@ -10,6 +10,8 @@
 #include "CookTorranceBRDF.h"
 #include "Emission.h"
 #include "Sensor.h"
+#include <memory>
+#include <vector>
 
 Camera controll_scene(const int w, const int h, std::vector<std::shared_ptr<Object>>& scene) {
     float aspect = float(w) / (h);

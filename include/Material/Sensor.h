@@ -22,8 +22,16 @@ public:
     }
 
     Vec3 sample(const Vec3& N, const Vec3& wo, float& pdf) const override {
-        pdf = 0.0f;
-        return Vec3(0.0f, 0.0f, 0.0f);
+        // pdf = 0.0f;
+        // return Vec3(0.0f, 0.0f, 0.0f);
+        Vec3 dri_local = cos_weight_sampling();
+        Vec3 T = tangent_vector(N);
+        Vec3 B = N.cross(T);
+        Vec3 wi = (T * dri_local.x + B * dri_local.y + N * dri_local.z).normalize();
+
+        pdf = std::max(0.0f, N.dot(wi)) / M_PI;
+
+        return wi;
     }
 
     float pdf(const Vec3& N, const Vec3& wi) const override {

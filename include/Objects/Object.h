@@ -2,6 +2,7 @@
 #include "Ray.h"
 #include "BRDF.h"
 #include "Vec3.h"
+#include <memory>
 
 class Object {
 public:

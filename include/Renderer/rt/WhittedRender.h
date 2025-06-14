@@ -3,6 +3,8 @@
 #include "Object.h"
 #include "Rectangle.h"
 #include "Vec3.h"
+#include <memory>
+#include <vector>
 
 
 Vec3 whitted_render(const Ray& r, const std::vector<std::shared_ptr<Object>>& scene) {

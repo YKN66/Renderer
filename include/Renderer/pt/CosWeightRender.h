@@ -3,6 +3,9 @@
 #include "Object.h"
 #include "Rectangle.h"
 #include "Vec3.h"
+#include <memory>
+#include <vector>
+#include <algorithm>
 
 Vec3 cos_weight_render(const Ray& r, const std::vector<std::shared_ptr<Object>>& scene, int depth) {
     const float epsilon = 1e-3f;

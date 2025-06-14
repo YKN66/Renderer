@@ -10,18 +10,23 @@ std::vector<PathVertex> generate_camera_subpath(const Camera& camera, const std:
     v0.x = camera.pos;
     v0.N = -camera.w;
     v0.wi = camera.get_ray(u, v).direction.normalize();
+    v0.wo = v0.wi;
     v0.brdf = std::make_shared<Sensor>();
     float cos_theta = std::max(0.0f, v0.N.dot(v0.wi));
     float A_img     = camera.viewport_width * camera.viewport_height;
-    float pdf_dir   = (cos_theta > 0.0f) ? (1.0f / (A_img * cos_theta)) : 0.0f;
-    v0.pdf_fwd = pdf_dir;
+    // float pdf_dir   = (cos_theta > 0.0f) ? (1.0f / (A_img * cos_theta)) : 0.0f;
+    // 透視変換:  dω = cos³θ / A_img · dA_img
+    float pdf_dir   = (cos_theta > 0.0f) ? 1.0f / (cos_theta * cos_theta * cos_theta * A_img) : 0.0f;
+    // float pdf_dir   = (cos_theta > 0.0f) ? cos_theta * cos_theta * cos_theta : 0.0f;
+
+    v0.pdf_area = 1.0f / A_img;
+    // v0.pdf_fwd = pdf_dir;
+    v0.pdf_fwd = cos_theta;
     v0.pdf_rev = pdf_dir;
-    // v0.pdf_fwd = 1.0f;
-    // v0.pdf_rev = 1.0f;
     v0.is_light = false;
     path.push_back(v0);
 
-    Ray ray(v0.x, v0.wi);
+    Ray ray(v0.x, v0.wo);
 
     for(int bounce = 0; bounce < depth; ++bounce) {
         float closest_t = 1e30f;
@@ -44,14 +49,15 @@ std::vector<PathVertex> generate_camera_subpath(const Camera& camera, const std:
 
         //方向サンプリング
         float pdf_fwd;
-        Vec3 wi = brdf->sample(N, wo, pdf_fwd);
+        Vec3 wi = hit_obj->get_material()->sample(N, wo, pdf_fwd);
         float pdf_rev = brdf->pdf(N, wi);
 
         PathVertex vn;
         vn.x = x;
         vn.N = N;
-        vn.wi = wo;
-        vn.brdf = brdf;
+        vn.wi = wi;
+        vn.wo = wo;
+        vn.brdf = hit_obj->get_material();
         vn.pdf_fwd = pdf_fwd;
         vn.pdf_rev = pdf_rev;
         vn.is_light = hit_obj->is_light();
@@ -60,7 +66,7 @@ std::vector<PathVertex> generate_camera_subpath(const Camera& camera, const std:
         if (vn.is_light) break;// 光源を直接見たら終了
         if(pdf_fwd < 1e-6f) break;
 
-        ray = Ray(x + N * 1e-3f, wi);
+        ray = Ray(vn.x + vn.N * 1e-3f, vn.wi);
     }
 
     return path;
@@ -93,7 +99,8 @@ std::vector<PathVertex> generate_light_subpath(const std::vector<std::shared_ptr
     v0.N = nL;
     v0.wi = -wi;
     v0.brdf = rect->get_material();
-    v0.pdf_fwd = 1.0f / rect->get_area();
+    v0.pdf_area = 1.0f / rect->get_area();
+    v0.pdf_fwd = pdf_dir;
     v0.pdf_rev = pdf_dir;
     v0.is_light = true;
     path.push_back(v0);

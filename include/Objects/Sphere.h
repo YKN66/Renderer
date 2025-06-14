@@ -1,5 +1,6 @@
 #pragma once
 #include "Object.h"
+#include <memory>
 
 class Sphere : public Object {
 public:
