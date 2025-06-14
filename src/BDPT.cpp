@@ -14,7 +14,7 @@
 int main() {
     const int image_width = 800;
     const int image_height = 400;
-    const int sample_num = 3;
+    const int sample_num = 50;
     const int max_path_len = 4;
 
     std::vector<std::shared_ptr<Object>> scene;

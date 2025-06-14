@@ -33,7 +33,6 @@ Vec3 bdpt_render(const Camera& camera, const std::vector<std::shared_ptr<Object>
         float cos0 = std::max(0.0f, v0.N.dot(-v0.wi));
         // beta_l[0] = v0.brdf->get_emission() * cos0 / std::max(v0.pdf_area * v0.pdf_fwd, 1e-6f);
         beta_l[0] = v0.brdf->get_emission() / std::max(v0.pdf_area, 1e-6f);
-        // beta_l[0] = v0.brdf->get_emission();
     }
 
     for (size_t i = 1; i < l_path.size(); ++i) {
@@ -42,6 +41,7 @@ Vec3 bdpt_render(const Camera& camera, const std::vector<std::shared_ptr<Object>
         Vec3 d = (v1.x - v0.x).normalize();
         float cos = std::max(0.0f, v0.N.dot(d));
         Vec3 fs = v0.is_light ? Vec3(1.0f, 1.0f, 1.0f): v0.brdf->evaluate(v0.N, d, v0.wi);
+        // Vec3 fs = v0.is_light ? Vec3(0.0f, 0.0f, 0.0f): v0.brdf->evaluate(v0.N, d, v0.wi);
 
         beta_l[i] = beta_l[i-1] * fs * cos / std::max(v0.pdf_fwd, 1e-6f);
 

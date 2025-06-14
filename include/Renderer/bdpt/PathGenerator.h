@@ -98,6 +98,7 @@ std::vector<PathVertex> generate_light_subpath(const std::vector<std::shared_ptr
     v0.x = L0;
     v0.N = nL;
     v0.wi = -wi;
+    v0.wo = -wi;
     v0.brdf = rect->get_material();
     v0.pdf_area = 1.0f / rect->get_area();
     v0.pdf_fwd = pdf_dir;
@@ -126,6 +127,10 @@ std::vector<PathVertex> generate_light_subpath(const std::vector<std::shared_ptr
         Vec3 wo = -ray.direction.normalize();
         auto brdf = hit_obj->get_material();
 
+        if(bounce > 0 && hit_obj->is_light()){
+            break;     // β_l の更新も行わず終了
+        }
+
         // float pdf_rev = brdf->pdf(N, wi);
         float pdf_fwd;
         Vec3 next_dir = brdf->sample(N, wo, pdf_fwd);
@@ -135,6 +140,7 @@ std::vector<PathVertex> generate_light_subpath(const std::vector<std::shared_ptr
         vn.x = x;
         vn.N = N;
         vn.wi = wo;
+        vn.wo = next_dir;
         vn.brdf = brdf;
         vn.pdf_fwd = pdf_fwd;
         vn.pdf_rev = pdf_rev;

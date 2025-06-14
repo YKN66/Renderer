@@ -21,7 +21,7 @@ int main() {
     Camera camera = controll_scene(image_width, image_height, scene);
 
     int bdpt_sample_num = 5;
-    int cos_sample_num = 20;
+    int cos_sample_num = 200;
     int max_path_len = 5;
 
     std::filesystem::create_directories("compare");
