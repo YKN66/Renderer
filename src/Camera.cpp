@@ -22,7 +22,7 @@ Camera::Camera(Vec3 lookFrom, Vec3 lookAt, Vec3 vup, float fov_dg, float aspect,
 
 Ray Camera::get_ray(float s, float t) const {
     Vec3 dir = upper_right_corner + horizontal * s + vertical * t - pos;
-    return Ray(pos, dir.normalize());
+    return Ray(pos, dir);
 }
 
 bool Camera::project_dir(const Vec3& dir_world, float& s, float& t) const {

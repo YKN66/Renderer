@@ -150,6 +150,16 @@ Vec3 cos_weight_sampling() {
     return Vec3(x, y, z);
 }
 
+// 上向き一様半球サンプリング
+Vec3 uniform_hemisphere() {
+    float xi1 = random_float();          // [0,1)
+    float xi2 = random_float();
+    float z   = xi1;                     // cosθ
+    float r   = std::sqrt(std::max(0.f, 1.f - z*z));
+    float phi = 2.0f * M_PI * xi2;
+    return Vec3(r * std::cos(phi), r * std::sin(phi), z);   // +z 方向が法線
+}
+
 Vec3 sample_light_sphere(const Vec3& center, float radians) {
     Vec3 dir = random_in_unit_sphere().normalize();
     return center + radians * dir;

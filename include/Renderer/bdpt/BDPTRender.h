@@ -11,42 +11,11 @@
 
 Vec3 bdpt_render(const Camera& camera, const std::vector<std::shared_ptr<Object>>& scene, float u, float v, int ss, int tt) {
 
-    int max_depth = std::max(ss, tt) + 2;
-    auto c_path = generate_camera_subpath(camera, scene, u, v, max_depth);
-    auto l_path = generate_light_subpath(scene, max_depth);
-
-
+    // int max_depth = std::max(ss, tt) + 2;
+    auto c_path = generate_camera_subpath(camera, scene, u, v, ss);
+    auto l_path = generate_light_subpath(scene, tt);
 
     Vec3 radiance(0.0f, 0.0f, 0.0f);
-
-    std::vector<Vec3> beta_c(c_path.size(), Vec3(1.0f, 1.0f, 1.0f));
-    for (size_t i = 1; i < c_path.size(); ++i) {
-        const auto& v0 = c_path[i-1];
-        float cos = std::max(0.0f, v0.N.dot(v0.wi));
-        Vec3 fs = v0.brdf->evaluate(v0.N, v0.wi, v0.wo);
-        beta_c[i] = beta_c[i-1] * fs * cos / std::max(v0.pdf_fwd, 1e-6f);
-    }
-
-    std::vector<Vec3> beta_l(l_path.size(), Vec3(1.0f, 1.0f, 1.0f));
-    if (!l_path.empty()) {
-        const auto& v0 = l_path[0];
-        float cos0 = std::max(0.0f, v0.N.dot(-v0.wi));
-        // beta_l[0] = v0.brdf->get_emission() * cos0 / std::max(v0.pdf_area * v0.pdf_fwd, 1e-6f);
-        beta_l[0] = v0.brdf->get_emission() / std::max(v0.pdf_area, 1e-6f);
-    }
-
-    for (size_t i = 1; i < l_path.size(); ++i) {
-        const auto& v0 = l_path[i-1];
-        const auto& v1 = l_path[i];
-        Vec3 d = (v1.x - v0.x).normalize();
-        float cos = std::max(0.0f, v0.N.dot(d));
-        Vec3 fs = v0.is_light ? Vec3(1.0f, 1.0f, 1.0f): v0.brdf->evaluate(v0.N, d, v0.wi);
-        // Vec3 fs = v0.is_light ? Vec3(0.0f, 0.0f, 0.0f): v0.brdf->evaluate(v0.N, d, v0.wi);
-
-        beta_l[i] = beta_l[i-1] * fs * cos / std::max(v0.pdf_fwd, 1e-6f);
-
-    }
-
 
     size_t s = ss;
     size_t t = tt;
@@ -58,7 +27,8 @@ Vec3 bdpt_render(const Camera& camera, const std::vector<std::shared_ptr<Object>
         if (s <= c_path.size() && vl.is_light){
             const auto& vl = c_path[s - 1];
             const auto& vc = c_path[s - 2];
-            radiance = beta_c[s-1] * vl.brdf->get_emission();
+            // radiance = beta_c[s-1] * vl.brdf->get_emission();
+            radiance = vl.beta * vl.brdf->get_emission();
         }
     }
     else if (s > 0 && t > 0) {
@@ -67,7 +37,8 @@ Vec3 bdpt_render(const Camera& camera, const std::vector<std::shared_ptr<Object>
             const auto& vl = l_path[t - 1];
             Vec3 G = connect_verices(vc, vl, scene);
         
-            Vec3 contribute = beta_c[s - 1] * beta_l[t - 1] * G;
+            // Vec3 contribute = beta_c[s - 1] * beta_l[t - 1] * G;
+            Vec3 contribute = vc.beta * vl.beta * G;
 
             // /* ---------- MIS ウェイト ---------- */
             // size_t k = s + t;

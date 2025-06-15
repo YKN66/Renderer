@@ -41,6 +41,7 @@ Vec3 operator*(float c, const Vec3& v);
 float random_float();
 Vec3 random_in_unit_sphere();
 Vec3 cos_weight_sampling();
+Vec3 uniform_hemisphere();
 
 Vec3 sample_light_sphere(const Vec3& center, float radians);
 Vec3 sample_light_rectangle(const Vec3& center, const Vec3& u, const Vec3& v);
