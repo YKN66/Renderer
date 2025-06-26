@@ -82,6 +82,14 @@ void Vec3::print(const std::string s) const{
     std::cout << ""<< s <<" =(" << x << ", " << y << ", " << z << ")\n";
 }
 
+float Vec3::max_component() const {
+    return std::max({x, y, z});
+}
+
+bool Vec3::is_zero(float eps) const {
+    return std::fabs(x) < eps && std::fabs(y) < eps && std::fabs(z) < eps;
+}
+
 Vec3 reflect(const Vec3& V, const Vec3& N) {
     Vec3 R = V - N * 2.0f * V.dot(N);
     return R;
@@ -117,10 +125,13 @@ Vec3 operator*(float c, const Vec3& v) {
     return Vec3(c * v.x, c * v.y, c * v.z);
 }
 
-std::mt19937 rng(std::random_device{}());
-std::uniform_real_distribution<float> dist(0.0f, 1.0f);
+// std::mt19937 rng(std::random_device{}());
+// std::uniform_real_distribution<float> dist(0.0f, 1.0f);
 
 float random_float() {
+    // return dist(rng);
+    thread_local static std::mt19937 rng(std::random_device{}());
+    thread_local static std::uniform_real_distribution<float> dist(0.0f, 1.0f);
     return dist(rng);
 }
 

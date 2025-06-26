@@ -54,18 +54,11 @@ Vec3 connect_verices(const PathVertex& vc, const PathVertex& vl, const std::vect
 
 }
 
-// ω_i = p_i^β / Σ_k p_k^β  (β=2 が一般的＝パワーヒューリスティック)
-float mis_power_heuristic(const std::vector<float>& pdfs, int i, float beta = 2.0f)
-{
+// パワーヒューリスティック
+float mis_power_heuristic(const std::vector<float>& pdfs, int i = 0, float beta = 2.0f) {
     if(pdfs.empty()) return 0.0f;
     float num   = std::pow(pdfs[i], beta);
     float denom = 0.0f;
     for (float p : pdfs) denom += std::pow(p, beta);
     return (denom > 0.0f) ? num / denom : 0.0f;
-}
-
-float simple_mis(int s, int t) {
-    // return 1.0f / float(s + t + 1);
-    return 1.0f / float(s + 1) * (t + 1);
-    // return 1.0f;
 }

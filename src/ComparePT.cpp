@@ -13,6 +13,8 @@
 #include <sstream>
 #include <filesystem>
 
+#pragma omp declare reduction( vec3_plus : Vec3 : omp_out += omp_in ) initializer( omp_priv = Vec3(0.0f, 0.0f, 0.0f) )
+
 
 int main() {
     const int image_width = 800;
@@ -22,7 +24,7 @@ int main() {
 
     int bdpt_sample_num = 5;
     int cos_sample_num = 200;
-    int max_path_len = 6;
+    int max_path_len = 10;
 
     std::filesystem::create_directories("compare");
 
@@ -105,10 +107,12 @@ int main() {
         std::cout << "  Rendering PT (CosWeight)" << std::endl;
         std::vector<float> pixels2(image_width * image_height * 3);
 
+        #pragma omp parallel for collapse(2) schedule(static)
         for(int j = image_height - 1; j >= 0; --j) {
             for(int i = 0; i < image_width; ++i) {
                 Vec3 color(0.0f, 0.0f, 0.0f);
 
+                #pragma omp simd reduction(vec3_plus:color)
                 for(int sample = 0; sample < cos_sample_num; sample++) {
                     float u = (i + random_float()) / (image_width - 1);
                     float v = (j + random_float()) / (image_height - 1);

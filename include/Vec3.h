@@ -28,6 +28,9 @@ public:
     void print(const std::string s) const;
     bool operator==(const Vec3& other) const;
 
+    float max_component() const;
+    bool is_zero(float eps = 1e-7f) const;
+
 };
 
 Vec3 reflect(const Vec3& V, const Vec3& N);

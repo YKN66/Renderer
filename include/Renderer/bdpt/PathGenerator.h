@@ -2,8 +2,11 @@
 #include "Vec3.h"
 #include "BRDF.h"
 #include "Path.h"
+#include <algorithm>
 
 static bool bounce_walk(std::vector<PathVertex>& path, const std::vector<std::shared_ptr<Object>>& scene, bool isLight) {
+
+    const int  kRRStartDepth  = 3;
 
     const PathVertex& prev = path.back();
     Ray ray(prev.x + prev.N * 1e-3f, prev.wi);
@@ -20,25 +23,11 @@ static bool bounce_walk(std::vector<PathVertex>& path, const std::vector<std::sh
     Vec3 wo = -ray.direction.normalize();
     auto  brdf = hit_obj->get_material();
 
-    // // 光源パスの “bounce==0” だけ：ここで v0 を確定させる
-    // if (isLight && path.size()==1){
-    //     PathVertex& v0 = path[0];
-
-    //     Vec3 d = x - v0.x;
-    //     float dist2 = d.length_squared();
-    //     float cos0  = std::max(0.f, v0.N.dot(v0.wi));
-    //     float pdfW0 = v0.pdf_A * v0.pdf_W * dist2 / cos0;
-
-    //     v0.beta = v0.brdf->get_emission() * cos0 / (v0.pdf_A * v0.pdf_W);
-    //     v0.pdf_W = pdfW0;
-    //     v0.pdf_rev = cos0 / dist2;
-    // }
     if (path.size()>1 && hit_obj->is_light() && isLight) return false;
 
     float pdf_W;
     Vec3  wi   = brdf->sample(N, wo, pdf_W);
-    float pdf_rev = brdf->pdf(N, wi);
-    if (pdf_W < 1e-6f) return false;
+    float pdf_rev = brdf->pdf(N, wo);
 
     PathVertex vn;
     vn.x = x;
@@ -48,6 +37,7 @@ static bool bounce_walk(std::vector<PathVertex>& path, const std::vector<std::sh
     vn.brdf = brdf;
     vn.pdf_W = pdf_W;
     vn.pdf_rev = pdf_rev;
+    if(hit_obj->is_light()) vn.pdf_A = 1.0f / hit_obj->get_area();
     vn.is_light = hit_obj->is_light();
 
     // ---- β 更新 ----
@@ -61,6 +51,15 @@ static bool bounce_walk(std::vector<PathVertex>& path, const std::vector<std::sh
     vn.vcm = prev.vcm * ratio;
 
     path.push_back(vn);
+    int depth = int(path.size()) - 1;
+
+    // if(depth >= kRRStartDepth){
+    //     float q = std::clamp(vn.beta.max_component(), 0.05f, 0.95f); // 生存確率
+    //     if(random_float() > q) return false;   // 打ち切り
+    //     vn.beta /= q;                   // 生存補正
+    // }
+
+    if (pdf_W < 1e-6f) return false;
     if (path.size()>1 && vn.is_light && !isLight) return false;
     return true;
 }
@@ -79,7 +78,6 @@ std::vector<PathVertex> generate_camera_subpath(const Camera& camera, const std:
     v0.brdf = std::make_shared<Sensor>();
     float cos_theta = std::max(0.0f, v0.N.dot(dir / std::sqrt(dist2)));
     float A_img     = camera.viewport_width * camera.viewport_height;
-    // 透視変換:  dω = cos³θ / A_img · dA_img
     float pdf_dir   = (cos_theta > 0.0f) ? 1.0f / (cos_theta * cos_theta * cos_theta * A_img) : 0.0f;
 
     v0.pdf_A = 1.0f / A_img;
@@ -98,55 +96,6 @@ std::vector<PathVertex> generate_camera_subpath(const Camera& camera, const std:
 
     Ray ray(v0.x, v0.wo);
 
-    // for(int bounce = 0; bounce < depth; ++bounce) {
-    //     float closest_t = 1e30f;
-    //     std::shared_ptr<Object> hit_obj = nullptr;
-
-    //     for(const auto& obj : scene) {
-    //         float t;
-    //         if(obj->hit(ray, 1e-3f, closest_t, t)) {
-    //             closest_t = t;
-    //             hit_obj = obj;
-    //         }
-    //     }
-
-    //     if(!hit_obj) break;
-
-    //     Vec3 x = ray.at(closest_t);
-    //     Vec3 N = hit_obj->get_normal(x);
-    //     Vec3 wo = -ray.direction.normalize();
-    //     auto brdf = hit_obj->get_material();
-
-    //     //方向サンプリング
-    //     float pdf_W;
-    //     Vec3 wi = brdf->sample(N, wo, pdf_W);
-    //     float pdf_rev = brdf->pdf(N, wo);
-
-    //     const PathVertex& prev = path.back();
-
-    //     PathVertex vn;
-    //     vn.x = x;
-    //     vn.N = N;
-    //     vn.wi = wi;
-    //     vn.wo = wo;
-    //     vn.brdf = brdf;
-    //     vn.pdf_W = pdf_W;
-    //     vn.pdf_rev = pdf_rev;
-    //     Vec3 d = (vn.x - prev.x).normalize();
-    //     float cos = std::max(0.0f, prev.N.dot(d));
-    //     Vec3 fs = prev.is_light ? Vec3(1.0f, 1.0f, 1.0f): prev.brdf->evaluate(prev.N, d, prev.wi);
-    //     vn.beta = prev.beta * fs * cos / std::max(prev.pdf_W, 1e-6f);
-    //     float ratio = (prev.pdf_W > 1e-6f) ? prev.pdf_rev / prev.pdf_W : 0.0f;
-    //     vn.vc = prev.vcm;
-    //     vn.vcm = prev.vcm * ratio;
-    //     vn.is_light = hit_obj->is_light();
-    //     path.push_back(vn);
-
-    //     if (vn.is_light) break;// 光源を直接見たら終了
-    //     if(pdf_W < 1e-6f) break;
-
-    //     ray = Ray(vn.x + vn.N * 1e-3f, vn.wi);
-    // }
     while(int(path.size())<depth)
         if(!bounce_walk(path,scene,false)) break;
 
@@ -168,7 +117,6 @@ std::vector<PathVertex> generate_light_subpath(const std::vector<std::shared_ptr
     Vec3 L0 = sample_light_rectangle(rect->get_center(), rect->get_u(), rect->get_v());
     Vec3 nL = rect->get_normal(L0);
 
-    //サンプリングの方向　local to world
     Vec3 dir_local = uniform_hemisphere();
     Vec3 T = tangent_vector(nL);
     Vec3 B = nL.cross(T);
@@ -196,72 +144,6 @@ std::vector<PathVertex> generate_light_subpath(const std::vector<std::shared_ptr
     path.push_back(v0);
 
     Ray ray(L0 + nL * 1e-3f, wi);
-
-    // for(int bounce = 0; bounce < depth; ++bounce) {
-    //     float closest_t = 1e30f;
-    //     std::shared_ptr<Object> hit_obj = nullptr;
-
-    //     for(const auto& obj : scene) { 
-    //         float t;
-    //         if(obj->hit(ray, 1e-3f, closest_t, t)) {
-    //             closest_t = t;
-    //             hit_obj = obj;
-    //         }
-    //     }
-
-    //     if(!hit_obj) break;
-
-    //     Vec3 x = ray.at(closest_t);
-    //     Vec3 N = hit_obj->get_normal(x);
-    //     Vec3 wo = -ray.direction.normalize();
-    //     auto brdf = hit_obj->get_material();
-
-    //     if(bounce == 0){
-    //         PathVertex& v0 = path[0];
-    //         Vec3 dir = x - v0.x;
-    //         float dist2 = dir.length_squared();
-    //         float cos0 = std::max(0.0f, v0.N.dot(v0.wi));
-    //         float pdfW0 = v0.pdf_A * v0.pdf_W * dist2 / cos0;
-    //         v0.beta = v0.brdf->get_emission() * cos0 / (v0.pdf_A * v0.pdf_W);
-    //         Vec3 l = v0.beta * v0.pdf_A * v0.pdf_W / cos0;
-    //         // std::cout << "beta = ("<< l.x <<", "<< l.y <<", "<< l.z <<")\n";
-    //         v0.pdf_W = pdfW0;
-    //         v0.pdf_rev = cos0 / dist2;
-    //     }
-
-    //     if(bounce > 0 && hit_obj->is_light()){
-    //         break;     // β_l の更新も行わず終了
-    //     }
-
-    //     // float pdf_rev = brdf->pdf(N, wi);
-    //     float pdf_W;
-    //     Vec3 wi = brdf->sample(N, wo, pdf_W);
-    //     float pdf_rev = brdf->pdf(N, wo);
-
-    //     const PathVertex& prev = path.back();
-
-    //     PathVertex vn;
-    //     vn.x = x;
-    //     vn.N = N;
-    //     vn.wi = wi;
-    //     vn.wo = wo;
-    //     vn.brdf = brdf;
-    //     vn.pdf_W = pdf_W;
-    //     vn.pdf_rev = pdf_rev;
-    //     Vec3 d = (vn.x - prev.x).normalize();
-    //     float cos = std::max(0.0f, prev.N.dot(d));
-    //     Vec3 fs = prev.is_light ? Vec3(1.0f, 1.0f, 1.0f): prev.brdf->evaluate(prev.N, d, prev.wi);
-    //     vn.beta = prev.beta * fs * cos / std::max(prev.pdf_W, 1e-6f);
-    //     float ratio = (prev.pdf_W > 1e-6f) ? prev.pdf_rev / prev.pdf_W : 0.0f;
-    //     vn.vc = prev.vcm;
-    //     vn.vcm = prev.vcm * ratio;
-    //     vn.is_light = hit_obj->is_light();
-    //     path.push_back(vn);
-
-    //     if(pdf_W < 1e-6f) break;
-
-    //     ray = Ray(x + N * 1e-6f, wi);
-    // }
 
     while(int(path.size())<depth)
         if(!bounce_walk(path,scene,true)) break;
