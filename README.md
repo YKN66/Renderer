@@ -1,7 +1,7 @@
 # Bidirectional Path Tracing Renderer  
-_C++17 / CMake / stb_image_write / tinyobjloader_
+_C++17 / CMake / stb_image_write / OpenMP
 
-![パストレーシングによるレンダリング画像](docs/images/cos.png)
+![パストレーシングによるレンダリング画像](docs/images/cos10000.png)
 
 
 > レイトレーシング → コサイン加重パストレーシング → Next Event Estimation → **双方向パストレーシング (BDPT)**  
@@ -16,9 +16,10 @@ _C++17 / CMake / stb_image_write / tinyobjloader_
 3. [ビルド & 実行](#ビルド)   
 4. [レンダリング画像](#画像) 
 5. [検証フロー](#検証)  
-6. [今後のロードマップ](#今後)  
-7. [参考文献](#参考文献)  
-8. [ライセンス](#ライセンス)  
+6. [今後のロードマップ](#今後) 
+7. [OpenMPの使用] 
+8. [参考文献](#参考文献)  
+9. [ライセンス](#ライセンス)  
 
 ---
 
@@ -105,6 +106,26 @@ deactivate                     # 仮想環境終了
 
 ## 今後のロードマップ<a name="今後"></a>
 完全なBDPTの実装
+
+
+## OpenMPの使用
+依存関係と OpenMP の導入 
+
+1. Homebrew で LLVM & LibOMP をインストール
+
+brew install llvm libomp
+
+2. シェル設定 (~/.zshrc) にパスを通す
+
+# --- OpenMP 用 ---
+export PATH="/opt/homebrew/opt/llvm/bin:$PATH"      # clang++, clang, lld など
+export LDFLAGS="-L/opt/homebrew/opt/libomp/lib"     # ランタイムを探す
+export CPPFLAGS="-I/opt/homebrew/opt/libomp/include"# ヘッダを探す
+
+設定後に反映:
+source ~/.zshrc
+which clang++   # /opt/homebrew/opt/llvm/bin/clang++ が出れば OK
+
 
 ## 参考文献<a name="参考文献"></a>
 | 著者               | タイトル                                                        | 備考           |
