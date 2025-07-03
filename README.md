@@ -1,7 +1,7 @@
 # Bidirectional Path Tracing Renderer  
 _C++17 / CMake / stb_image_write / OpenMP
 
-![パストレーシングによるレンダリング画像](docs/images/cos10000.png)
+![パストレーシングによるレンダリング画像](docs/images/cos_10000.png)
 
 
 > レイトレーシング → コサイン加重パストレーシング → Next Event Estimation → **双方向パストレーシング (BDPT)**  
@@ -17,7 +17,7 @@ _C++17 / CMake / stb_image_write / OpenMP
 4. [レンダリング画像](#画像) 
 5. [検証フロー](#検証)  
 6. [今後のロードマップ](#今後) 
-7. [OpenMPの使用] 
+7. [OpenMPの使用](#OpenMP)
 8. [参考文献](#参考文献)  
 9. [ライセンス](#ライセンス)  
 
@@ -108,7 +108,7 @@ deactivate                     # 仮想環境終了
 完全なBDPTの実装
 
 
-## OpenMPの使用
+## OpenMPの使用<a name="OpenMP"></a>
 依存関係と OpenMP の導入 
 
 1. Homebrew で LLVM & LibOMP をインストール
