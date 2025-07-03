@@ -54,11 +54,53 @@ Vec3 connect_verices(const PathVertex& vc, const PathVertex& vl, const std::vect
 
 }
 
-// パワーヒューリスティック
-float mis_power_heuristic(const std::vector<float>& pdfs, int i = 0, float beta = 2.0f) {
-    if(pdfs.empty()) return 0.0f;
-    float num   = std::pow(pdfs[i], beta);
-    float denom = 0.0f;
-    for (float p : pdfs) denom += std::pow(p, beta);
-    return (denom > 0.0f) ? num / denom : 0.0f;
+// // パワーヒューリスティック
+// float mis_power_heuristic(const std::vector<float>& pdfs, int i = 0, float beta = 2.0f) {
+//     if(pdfs.empty()) return 0.0f;
+//     float num   = std::pow(pdfs[i], beta);
+//     float denom = 0.0f;
+//     for (float p : pdfs) denom += std::pow(p, beta);
+//     return (denom > 0.0f) ? num / denom : 0.0f;
+// }
+
+float mis_power_heuristic(const std::vector<float>& pdfs, int i, float beta = 2.f)
+{
+    if(pdfs.empty()) return 0.f;
+
+    /* ① 有効な最大値を取り出して 1 以下へ正規化 */
+    float max_pdf = 0.f;
+    for(float p : pdfs)
+        if(std::isfinite(p) && p > max_pdf) max_pdf = p;
+    if(max_pdf <= 0.f) return 0.f;
+
+    /* ② 正規化 → pow → 加算。これで pow が inf になることはない */
+    float num = 0.f, denom = 0.f;
+    for(size_t k = 0; k < pdfs.size(); ++k)
+    {
+        float w = pdfs[k] / max_pdf;                // 0–1 に収まる
+        if(!std::isfinite(w) || w <= 0.f) continue; // NaN, inf, 0 は無視
+        w = std::pow(w, beta);
+
+        if(int(k) == i) num = w;
+        denom += w;
+    }
+    return (denom > 0.f) ? num / denom : 0.f;
+}
+
+
+float simple_mis(int s, int t) {
+    return 1.0f / float(s + t - 1);
+}
+
+inline void debug_mis_sum(const std::vector<float>& pdfs, float beta = 2.f, const char* tag = "")
+{
+    float sum = 0.f;
+    for(size_t k = 0; k < pdfs.size(); ++k)
+        sum += mis_power_heuristic(pdfs, static_cast<int>(k), beta);
+
+    // 許容誤差 1e-4 以上ならログを吐く
+    if(std::fabs(sum - 1.f) > 1e-4f)
+        std::fprintf(stderr,
+            "[MIS-SUM] %s Σw = %.9f (|err| = %.3e, n = %zu)\n",
+            tag, sum, std::fabs(sum - 1.f), pdfs.size());
 }

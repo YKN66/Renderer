@@ -8,11 +8,14 @@
 #include <iostream>
 #include <vector>
 #include <memory>
+#include <cstdio>
+#include <cmath>
 
 
 inline float dir2area(const float pdf, const PathVertex& v_from, const PathVertex& v_to) {
     Vec3  d      = v_to.x - v_from.x;
-    float dist2  = d.length_squared();
+    // float dist2  = d.length_squared();
+    float dist2  = std::max(d.length_squared(), 1e-6f);
     if(dist2 == 0.f) return 0.f;
     float dist   = std::sqrt(dist2);
     Vec3  dir    = d / dist;
@@ -146,7 +149,7 @@ std::vector<StrategyPDF> compute_strategy_pdfs(const std::vector<PathVertex>& cp
 
 
 
-Vec3 bdpt_render(const Camera& camera, const std::vector<std::shared_ptr<Object>>& scene, float u, float v) {
+Vec3 bdpt_render(const Camera& camera, const std::vector<std::shared_ptr<Object>>& scene, float u, float v, float& mis_error) {
 
     const int MaxDepth = 10;
     auto l_path = generate_light_subpath(scene, MaxDepth - 1);
@@ -170,23 +173,6 @@ Vec3 bdpt_render(const Camera& camera, const std::vector<std::shared_ptr<Object>
                 if (s <= c_path.size() && vl.is_light){
                     const auto& vl = c_path[s - 1];
                     contrib = vl.beta * vl.brdf->get_emission();
-
-
-                    std::vector<PathVertex> cp_part(c_path.begin(), c_path.begin()+s);
-                    std::vector<PathVertex> lp_part(l_path.begin(), l_path.begin()+t);
-
-
-                    auto pdfs_st = compute_strategy_pdfs(cp_part, lp_part, s, t);
-                    std::vector<float> pdfs;  pdfs.reserve(pdfs_st.size());
-                    int idx = -1;
-                    for(size_t i=0;i<pdfs_st.size();++i){
-                        pdfs.push_back(pdfs_st[i].pdf);
-                        if(pdfs_st[i].s == s && pdfs_st[i].t == t) idx = int(i);
-                    }
-                    if(idx < 0) continue;
-                    float w = mis_power_heuristic(pdfs, idx, 2.0f);
-
-                    radiance += contrib * w;
                 }
             }
             else{
@@ -195,24 +181,33 @@ Vec3 bdpt_render(const Camera& camera, const std::vector<std::shared_ptr<Object>
                 if(G.is_zero()) continue;
 
                 contrib = vc.beta * vl.beta * G;
-
-
-                std::vector<PathVertex> cp_part(c_path.begin(), c_path.begin()+s);
-                std::vector<PathVertex> lp_part(l_path.begin(), l_path.begin()+t);
-
-
-                auto pdfs_st = compute_strategy_pdfs(cp_part, lp_part, s, t);
-                std::vector<float> pdfs;  pdfs.reserve(pdfs_st.size());
-                int idx = -1;
-                for(size_t i=0;i<pdfs_st.size();++i){
-                    pdfs.push_back(pdfs_st[i].pdf);
-                    if(pdfs_st[i].s == s && pdfs_st[i].t == t) idx = int(i);
-                }
-                if(idx < 0) continue;
-                float w = mis_power_heuristic(pdfs, idx, 2.0f);
-
-                radiance += contrib * w;
             }
+
+            std::vector<PathVertex> cp_part(c_path.begin(), c_path.begin()+s);
+            std::vector<PathVertex> lp_part(l_path.begin(), l_path.begin()+t);
+
+
+            auto pdfs_st = compute_strategy_pdfs(cp_part, lp_part, s, t);
+
+
+            std::vector<float> pdfs;  pdfs.reserve(pdfs_st.size());
+            int idx = -1;
+            for(size_t i=0;i<pdfs_st.size();++i){
+                pdfs.push_back(pdfs_st[i].pdf);
+                if(pdfs_st[i].s == s && pdfs_st[i].t == t) idx = int(i);
+            }
+            if(idx < 0) continue;
+            float w = mis_power_heuristic(pdfs, idx, 2.0f);
+            // float w = simple_mis(s, t);
+
+
+            float sum_w = 0.0f;
+            for(size_t k=0; k<pdfs.size(); ++k)
+                sum_w += mis_power_heuristic(pdfs, int(k), 2.0f);   // 全ストラテジ分
+
+            mis_error += std::fabs(sum_w - 1.0f);  // ★ ここで誤差だけ蓄積
+
+            radiance += contrib * w;
         }
 
     }
