@@ -8,7 +8,7 @@
 
 
 Vec3 whitted_render(const Ray& r, const std::vector<std::shared_ptr<Object>>& scene) {
-    const float epsilon = 1e-3f;
+    const float epsilon = 1e-4f;
     Vec3 radiance(0.0f, 0.0f, 0.0f);
 
     float closest_t = 1e30f;

@@ -5,7 +5,7 @@
 #include "Ray.h"
 #include "Camera.h"
 #include "Scene.h"
-#include "NEERender.h"
+#include "RayCastingRender.h"
 
 #include <sstream>
 #include <filesystem>
@@ -18,7 +18,7 @@ int main() {
     std::vector<std::shared_ptr<Object>> scene;
     Camera camera = controll_scene(image_width, image_height, scene);
 
-    int sample_num = 400;
+    int sample_num = 50;
 
     std::vector<float> pixels(image_width * image_height * 3);
 
@@ -34,7 +34,7 @@ int main() {
             for(int s = 0; s < sample_num; s++){
 
                 Ray r = camera.get_ray(u, v);
-                color += nee_render(r, scene, 50);
+                color += casting_render(r, scene);
 
             }
             color /= sample_num;
@@ -42,13 +42,13 @@ int main() {
             size_t idx = (j * image_width + i) * 3; 
             pixels[idx + 0] = color.x; 
             pixels[idx + 1] = color.y; 
-            pixels[idx + 2] = color.z;
+            pixels[idx + 2] = color.z; 
         }
     }
 
     std::filesystem::create_directories("results");
     std::ostringstream filename;
-    filename << "results/nee.pfm";
+    filename << "results/rc.pfm";
     write_pfm(filename.str(), pixels, image_width, image_height);
 
     return 0;

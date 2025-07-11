@@ -30,6 +30,14 @@ include_directories(
 
 )
 
+add_executable(raycasting
+	src/RayCasting.cpp
+	src/Vec3.cpp
+	src/Ray.cpp
+   	src/Camera.cpp
+)
+link_openmp(raycasting)
+
 add_executable(raytracing
 	src/Raytracing.cpp
 	src/Vec3.cpp

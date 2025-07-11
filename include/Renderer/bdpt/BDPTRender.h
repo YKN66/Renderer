@@ -11,12 +11,33 @@
 #include <cstdio>
 #include <cmath>
 
+inline std::vector<PathVertex> make_full_path(const std::vector<PathVertex>& c_path, const std::vector<PathVertex>& l_path) {
+    std::vector<PathVertex> full;
+    full.reserve(c_path.size() + l_path.size());
+
+    /* 1) カメラ側をそのまま先頭へ  x0, x1, …, xs-1 */
+    full.insert(full.end(), c_path.begin(), c_path.end());
+
+    /* 2) 光源側は後ろに逆順で追加  yt-1, …, y1, y0  */
+    for(auto it = l_path.rbegin(); it != l_path.rend(); ++it)
+        full.push_back(*it);
+
+    // /* 3) 各頂点の wi / wo を“つなぎ目”に合わせて再設定
+    //       ─ wi: 次頂点へ進む方向
+    //       ─ wo: 前頂点（=カメラ側）へ向かう方向 */
+    // for(std::size_t i = 0; i + 1 < full.size(); ++i){
+    //     Vec3 dir = (full[i+1].x - full[i].x).normalize(); // i → i+1
+    //     full[i].wi     = dir;
+    //     full[i+1].wo   = -dir;
+    // }
+    return full;
+}
+
 
 inline float dir2area(const float pdf, const PathVertex& v_from, const PathVertex& v_to) {
     Vec3  d      = v_to.x - v_from.x;
-    // float dist2  = d.length_squared();
-    float dist2  = std::max(d.length_squared(), 1e-6f);
-    if(dist2 == 0.f) return 0.f;
+    float dist2  = d.length_squared();
+    if(dist2 == 0.0f) return 0.0f;
     float dist   = std::sqrt(dist2);
     Vec3  dir    = d / dist;
     float cos_v  = std::max(0.f, v_from.N.dot(dir));
@@ -41,16 +62,136 @@ struct StrategyPDF {
     float pdf; 
 };
 
+// std::vector<StrategyPDF> compute_strategy_pdfs(const std::vector<PathVertex>& cp, const std::vector<PathVertex>& cl, int s, int t) {
+
+//     const int k = static_cast<int>(cp.size() + cl.size()) - 1;
+//     std::vector<StrategyPDF> out;
+//     out.reserve(s + t);
+//     // if(s  + t != cp.size() + cl.size()) { 
+//     // if(s  != (int)cp.size() || t != (int)cl.size()) {
+//     //     std::cout << "s + t != path.size";
+//     //     return out;
+//     // }
+
+//     auto camera2light=[&](int a,int b){
+//         float p = 1.0f;
+//         for(int i=a;i<=b;++i){
+//             float t=dir2area(cp[i].pdf_W, cp[i], cp[i+1]);
+//             // std::cout << "camera : x" << i << " → x" << i+1 << " : " << t << "\n";
+//             p *= t;
+//         }
+//         return p;
+//     };
+//     auto light2camera=[&](int a,int b){
+//         float p = 1.0f;
+//         for(int i=a;i<=b;++i){
+//             float t=dir2area(cl[i].pdf_W, cl[i], cl[i+1]);
+//             // std::cout << "light : y" << i << " → y" << i+1 << " : " << t << "\n";
+//             // std::cout <<  i << "pdf : (" << cl[i].pdf_W << ")" << "\n";
+//             // std::cout << "(" << cl[i].x.x << ", " << cl[i].x.y << ", " << cl[i].x.z << ")" << "\n";
+//             // std::cout << "(" << cl[i+1].x.x << ", " << cl[i+1].x.y << ", " << cl[i+1].x.z << ")" << "\n";
+//             p *= t;
+//         }
+//         return p;
+//     };
+
+//     float Pst = 1.0f;
+//     if(s>0) Pst *= cp[0].pdf_A;
+//     if(s-2>=0) Pst *= camera2light(0,s-2);
+//     if(t>0) Pst *= cl[0].pdf_A;
+//     if(t-2>=0) Pst *= light2camera(0,t-2);
+        
+//     out.push_back({s,t,Pst}); 
+
+//     //  光源側へ 
+//     int cur_s=s, cur_t=t; float P=Pst;
+//     while(cur_t>0){
+//         if(cur_s == s) {
+//             P   *= dir2area(cal_pdf(cp[cur_s-1], cl[cur_t-1]), cp[cur_s-1], cl[cur_t-1]);
+//             // std::cout << "light : x" << cur_s-1 << "→ y" << cur_t-1 << " : " << cal_pdf(cp[cur_s-1], cl[cur_t-1]) << "\n";
+//             // std::cout << "light : x" << cur_s-1 << "→ y" << cur_t-1 << " : " << dir2area(cal_pdf(cp[cur_s-1], cl[cur_t-1]), cp[cur_s-1], cl[cur_t-1]) << "\n";
+//         }
+//         else{
+//             if(cur_t>0) P *= dir2area(cl[cur_t].pdf_rev, cl[cur_t], cl[cur_t-1]);
+//             // std::cout << "light : y" << cur_t << ", y" << cur_t-1 << " : " << P << "\n";
+//             // std::cout << "(" << cl[cur_t].x.x << ", " << cl[cur_t].x.y << ", " << cl[cur_t].x.z << ")" << " → ";
+//             // std::cout << "(" << cl[cur_t-1].x.x << ", " << cl[cur_t-1].x.y << ", " << cl[cur_t-1].x.z << ") : " << cl[cur_t].pdf_rev << " → " << dir2area(cl[cur_t].pdf_rev, cl[cur_t], cl[cur_t-1]) << "\n";
+//         }
+//         ++cur_s; --cur_t;
+//         if(cur_t>0)   P /= dir2area(cl[cur_t-1].pdf_W, cl[cur_t-1], cl[cur_t]);
+//         else P /= cl[0].pdf_A; //t=0
+//         out.push_back({cur_s, cur_t, P});
+//     }
+
+//     // カメラ側へ
+//     cur_s=s, cur_t=t; P=Pst;
+//     while(cur_s>2){
+//         if(t == 0) {
+//             if(cur_t == t){
+//                 P *= cp[s-1].pdf_A;
+//                 // std::cout << "x" << s-1 << " pdfA : " << cp[s-1].pdf_A <<std::endl;
+//             }
+//             else {
+//                 if(cur_s>0) P *= dir2area(cp[cur_s].pdf_rev, cp[cur_s], cp[cur_s-1]);
+//                 // std::cout << "light : x" << cur_s << "→ x" << cur_s-1 << " : " << dir2area(cp[cur_s].pdf_rev, cp[cur_s], cp[cur_s-1]) << "\n";
+//                 // std::cout << cp[cur_s].pdf_rev << std::endl;
+//                 // std::cout << "(" << cp[cur_s].x.x << ", " << cp[cur_s].x.y << ", " << cp[cur_s].x.z << ")" << " → ";
+//                 // std::cout << "(" << cp[cur_s-1].x.x << ", " << cp[cur_s-1].x.y << ", " << cp[cur_s-1].x.z << ")" << "\n";
+//             }
+            
+//             ++cur_t; --cur_s;
+//             if(cur_s>0)   P /= dir2area(cp[cur_s-1].pdf_W, cp[cur_s-1], cp[cur_s]);
+//             else P /= cp[0].pdf_A; //s=0
+//             out.push_back({cur_s, cur_t, P});
+//         }
+//         else{
+//             if(cur_t == t) {
+//                 P   *= dir2area(cal_pdf(cl[cur_t-1], cp[cur_s-1]), cl[cur_t-1], cp[cur_s-1]);
+//                 // std::cout << "light : y" << cur_t-1 << ", x" << cur_s-1 << " : " << cal_pdf(cl[cur_t-1], cp[cur_s-1]) << "\n";
+//                 // std::cout << "light : y" << cur_t-1 << ", x" << cur_s-1 << " : " << dir2area(cal_pdf(cl[cur_t-1], cp[cur_s-1]), cl[cur_t-1], cp[cur_s-1]) << "\n";
+//             }
+//             else{
+//                 if(cur_s>0) P *= dir2area(cp[cur_s].pdf_rev, cp[cur_s], cp[cur_s-1]);
+//                 // std::cout << "light : x" << cur_s << ", x" << cur_s-1 << " : " << P << "\n";
+//                 // std::cout << "(" << cp[cur_s].x.x << ", " << cp[cur_s].x.y << ", " << cp[cur_s].x.z << ")" << " → ";
+//                 // std::cout << "(" << cp[cur_s-1].x.x << ", " << cp[cur_s-1].x.y << ", " << cp[cur_s-1].x.z << ")" << "\n";
+//             }
+//             ++cur_t; --cur_s;
+//             if(cur_s>0)   P /= dir2area(cp[cur_s-1].pdf_W, cp[cur_s-1], cp[cur_s]);
+//             else P /= cp[0].pdf_A; //s=0
+//             out.push_back({cur_s, cur_t, P});
+//         }
+
+//     }
+
+
+//     return out;
+// }
+
+
 std::vector<StrategyPDF> compute_strategy_pdfs(const std::vector<PathVertex>& cp, const std::vector<PathVertex>& cl, int s, int t) {
 
-    const int k = static_cast<int>(cp.size() + cl.size()) - 1;
+    const int path_length = static_cast<int>(cp.size() + cl.size()) - 1;
     std::vector<StrategyPDF> out;
     out.reserve(s + t);
-    // if(s  + t != cp.size() + cl.size()) { 
-    // if(s  != (int)cp.size() || t != (int)cl.size()) {
-    //     std::cout << "s + t != path.size";
-    //     return out;
+
+    std::vector<float> c2l;
+    std::vector<float> l2c;
+    c2l.reserve(path_length);
+    l2c.reserve(path_length);
+
+    auto fp = make_full_path(cp, cl);
+
+    // for(int i = 0; i < path_length; i++) {
+    //     if(i < cp.size() - 1) c2l[i] = fp[i].pdf_W;
+    //     else if(i = cp.size() - 1) c2l[i] = dir2area(cal_pdf(fp[i], fp[i + 1]), fp[i], fp[i + 1]);
+    //     else c2l[i] = fp[i].pdf_rev;
     // }
+    // for(int i = 0; i < path_length; i++) {
+    //     if(i < cl.size() - 1) l2c[i] = fp[fp.size() - 1 - i].pdf_W;
+    //     else if(i = cl.size() - 1) l2c[i] = dir2area(cal_pdf(fp[fp.size() - 1 - i], fp[fp.size() - 2 - i]), fp[fp.size() - 1 - i], fp[fp.size() - 2 - i]);
+    // }
+
 
     auto camera2light=[&](int a,int b){
         float p = 1.0f;
@@ -183,29 +324,29 @@ Vec3 bdpt_render(const Camera& camera, const std::vector<std::shared_ptr<Object>
                 contrib = vc.beta * vl.beta * G;
             }
 
-            std::vector<PathVertex> cp_part(c_path.begin(), c_path.begin()+s);
-            std::vector<PathVertex> lp_part(l_path.begin(), l_path.begin()+t);
+            // std::vector<PathVertex> cp_part(c_path.begin(), c_path.begin()+s);
+            // std::vector<PathVertex> lp_part(l_path.begin(), l_path.begin()+t);
 
 
-            auto pdfs_st = compute_strategy_pdfs(cp_part, lp_part, s, t);
+            // auto pdfs_st = compute_strategy_pdfs(cp_part, lp_part, s, t);
 
 
-            std::vector<float> pdfs;  pdfs.reserve(pdfs_st.size());
-            int idx = -1;
-            for(size_t i=0;i<pdfs_st.size();++i){
-                pdfs.push_back(pdfs_st[i].pdf);
-                if(pdfs_st[i].s == s && pdfs_st[i].t == t) idx = int(i);
-            }
-            if(idx < 0) continue;
-            float w = mis_power_heuristic(pdfs, idx, 2.0f);
-            // float w = simple_mis(s, t);
+            // std::vector<float> pdfs;  pdfs.reserve(pdfs_st.size());
+            // int idx = -1;
+            // for(size_t i=0;i<pdfs_st.size();++i){
+            //     pdfs.push_back(pdfs_st[i].pdf);
+            //     if(pdfs_st[i].s == s && pdfs_st[i].t == t) idx = int(i);
+            // }
+            // if(idx < 0) continue;
+            // float w = mis_power_heuristic(pdfs, idx, 2.0f);
+            float w = simple_mis(s, t);
 
 
-            float sum_w = 0.0f;
-            for(size_t k=0; k<pdfs.size(); ++k)
-                sum_w += mis_power_heuristic(pdfs, int(k), 2.0f);   // 全ストラテジ分
+            // float sum_w = 0.0f;
+            // for(size_t k=0; k<pdfs.size(); ++k)
+            //     sum_w += mis_power_heuristic(pdfs, int(k), 2.0f);   // 全ストラテジ分
 
-            mis_error += std::fabs(sum_w - 1.0f);  // ★ ここで誤差だけ蓄積
+            // mis_error += std::fabs(sum_w - 1.0f);  // ★ ここで誤差だけ蓄積
 
             radiance += contrib * w;
         }
@@ -214,6 +355,22 @@ Vec3 bdpt_render(const Camera& camera, const std::vector<std::shared_ptr<Object>
 
     return radiance;
 }
+
+// Vec3 path_generate_p(const Camera& camera, const std::vector<std::shared_ptr<Object>>& scene, float u, float v) {
+
+//     const int MaxDepth = 10;
+//     auto l_path = generate_light_subpath(scene, MaxDepth - 1);
+//     auto c_path = generate_camera_subpath(camera, scene, u, v, MaxDepth - 1);
+
+//     Vec3 radiance(0.0f, 0.0f, 0.0f);
+
+//     int sMax = (int)c_path.size();
+//     int tMax = (int)l_path.size();
+//     // std::cout << "sMax " << sMax << std::endl;
+//     // std::cout << "tMax " << tMax << std::endl << std::endl;
+
+
+// }
 
 
 

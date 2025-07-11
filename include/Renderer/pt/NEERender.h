@@ -9,7 +9,7 @@
 
 
 Vec3 nee_render(const Ray& r, const std::vector<std::shared_ptr<Object>>& scene, int depth) {
-    const float epsilon = 1e-3f;
+    const float epsilon = 1e-4f;
     const int RR = 99;
     Vec3 throughput(1.0f, 1.0f, 1.0f);
     Vec3 radiance(0.0f, 0.0f, 0.0f);

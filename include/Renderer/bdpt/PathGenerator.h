@@ -9,12 +9,12 @@ static bool bounce_walk(std::vector<PathVertex>& path, const std::vector<std::sh
     const int  kRRStartDepth  = 3;
 
     const PathVertex& prev = path.back();
-    Ray ray(prev.x + prev.N * 1e-3f, prev.wi);
+    Ray ray(prev.x + prev.N * 1e-4f, prev.wi);
 
     float closest_t = 1e30f;
     std::shared_ptr<Object> hit_obj = nullptr;
     for (const auto& obj : scene){
-        float t; if(obj->hit(ray, 1e-3f, closest_t, t)){ closest_t = t; hit_obj = obj; }
+        float t; if(obj->hit(ray, 1e-4f, closest_t, t)){ closest_t = t; hit_obj = obj; }
     }
     if (!hit_obj) return false;
 
@@ -143,7 +143,7 @@ std::vector<PathVertex> generate_light_subpath(const std::vector<std::shared_ptr
     v0.beta = rect->get_material()->get_emission() / std::max(v0.pdf_A, 1e-6f);
     path.push_back(v0);
 
-    Ray ray(L0 + nL * 1e-3f, wi);
+    Ray ray(L0 + nL * 1e-4f, wi);
 
     while(int(path.size())<depth)
         if(!bounce_walk(path,scene,true)) break;
