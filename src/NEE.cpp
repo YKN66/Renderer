@@ -18,7 +18,7 @@ int main() {
     std::vector<std::shared_ptr<Object>> scene;
     Camera camera = controll_scene(image_width, image_height, scene);
 
-    int sample_num = 400;
+    int sample_num = 700;
 
     std::vector<float> pixels(image_width * image_height * 3);
 

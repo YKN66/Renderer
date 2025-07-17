@@ -175,114 +175,51 @@ std::vector<StrategyPDF> compute_strategy_pdfs(const std::vector<PathVertex>& cp
     std::vector<StrategyPDF> out;
     out.reserve(s + t);
 
-    std::vector<float> c2l;
-    std::vector<float> l2c;
-    c2l.reserve(path_length);
-    l2c.reserve(path_length);
+    std::vector<float> c2l(path_length, 0.0f);
+    std::vector<float> l2c(path_length, 0.0f);
+    // c2l.reserve(path_length);
+    // l2c.reserve(path_length);
 
     auto fp = make_full_path(cp, cl);
 
-    // for(int i = 0; i < path_length; i++) {
-    //     if(i < cp.size() - 1) c2l[i] = fp[i].pdf_W;
-    //     else if(i = cp.size() - 1) c2l[i] = dir2area(cal_pdf(fp[i], fp[i + 1]), fp[i], fp[i + 1]);
-    //     else c2l[i] = fp[i].pdf_rev;
-    // }
-    // for(int i = 0; i < path_length; i++) {
-    //     if(i < cl.size() - 1) l2c[i] = fp[fp.size() - 1 - i].pdf_W;
-    //     else if(i = cl.size() - 1) l2c[i] = dir2area(cal_pdf(fp[fp.size() - 1 - i], fp[fp.size() - 2 - i]), fp[fp.size() - 1 - i], fp[fp.size() - 2 - i]);
+    // for(int i=0;i<fp.size();i++){
+    //     std::cout << i << std::endl;
+    //     std::cout << "x = (" << fp[i].x.x << ", " << fp[i].x.y << ", " << fp[i].x.z << ")" << std::endl;
+    //     std::cout << "pdf = (" << fp[i].pdf_W << ", " << fp[i].pdf_rev << ")" << std::endl;
     // }
 
-
-    auto camera2light=[&](int a,int b){
-        float p = 1.0f;
-        for(int i=a;i<=b;++i){
-            float t=dir2area(cp[i].pdf_W, cp[i], cp[i+1]);
-            // std::cout << "camera : x" << i << " → x" << i+1 << " : " << t << "\n";
-            p *= t;
-        }
-        return p;
-    };
-    auto light2camera=[&](int a,int b){
-        float p = 1.0f;
-        for(int i=a;i<=b;++i){
-            float t=dir2area(cl[i].pdf_W, cl[i], cl[i+1]);
-            // std::cout << "light : y" << i << " → y" << i+1 << " : " << t << "\n";
-            // std::cout <<  i << "pdf : (" << cl[i].pdf_W << ")" << "\n";
-            // std::cout << "(" << cl[i].x.x << ", " << cl[i].x.y << ", " << cl[i].x.z << ")" << "\n";
-            // std::cout << "(" << cl[i+1].x.x << ", " << cl[i+1].x.y << ", " << cl[i+1].x.z << ")" << "\n";
-            p *= t;
-        }
-        return p;
-    };
-
-    float Pst = 1.0f;
-    if(s>0) Pst *= cp[0].pdf_A;
-    if(s-2>=0) Pst *= camera2light(0,s-2);
-    if(t>0) Pst *= cl[0].pdf_A;
-    if(t-2>=0) Pst *= light2camera(0,t-2);
-        
-    out.push_back({s,t,Pst}); 
-
-    //  光源側へ 
-    int cur_s=s, cur_t=t; float P=Pst;
-    while(cur_t>0){
-        if(cur_s == s) {
-            P   *= dir2area(cal_pdf(cp[cur_s-1], cl[cur_t-1]), cp[cur_s-1], cl[cur_t-1]);
-            // std::cout << "light : x" << cur_s-1 << "→ y" << cur_t-1 << " : " << cal_pdf(cp[cur_s-1], cl[cur_t-1]) << "\n";
-            // std::cout << "light : x" << cur_s-1 << "→ y" << cur_t-1 << " : " << dir2area(cal_pdf(cp[cur_s-1], cl[cur_t-1]), cp[cur_s-1], cl[cur_t-1]) << "\n";
-        }
-        else{
-            if(cur_t>0) P *= dir2area(cl[cur_t].pdf_rev, cl[cur_t], cl[cur_t-1]);
-            // std::cout << "light : y" << cur_t << ", y" << cur_t-1 << " : " << P << "\n";
-            // std::cout << "(" << cl[cur_t].x.x << ", " << cl[cur_t].x.y << ", " << cl[cur_t].x.z << ")" << " → ";
-            // std::cout << "(" << cl[cur_t-1].x.x << ", " << cl[cur_t-1].x.y << ", " << cl[cur_t-1].x.z << ") : " << cl[cur_t].pdf_rev << " → " << dir2area(cl[cur_t].pdf_rev, cl[cur_t], cl[cur_t-1]) << "\n";
-        }
-        ++cur_s; --cur_t;
-        if(cur_t>0)   P /= dir2area(cl[cur_t-1].pdf_W, cl[cur_t-1], cl[cur_t]);
-        else P /= cl[0].pdf_A; //t=0
-        out.push_back({cur_s, cur_t, P});
+    for(int i = 0; i < path_length; i++) {
+        if(i < cp.size() - 1) c2l[i] = dir2area(fp[i].pdf_W, fp[i], fp[i + 1]);
+        else if(i == cp.size() - 1) c2l[i] = dir2area(cal_pdf(fp[i], fp[i + 1]), fp[i], fp[i + 1]);
+        else c2l[i] = dir2area(fp[i].pdf_rev, fp[i], fp[i + 1]);
     }
 
-    // カメラ側へ
-    cur_s=s, cur_t=t; P=Pst;
-    while(cur_s>2){
-        if(t == 0) {
-            if(cur_t == t){
-                P *= cp[s-1].pdf_A;
-                // std::cout << "x" << s-1 << " pdfA : " << cp[s-1].pdf_A <<std::endl;
-            }
-            else {
-                if(cur_s>0) P *= dir2area(cp[cur_s].pdf_rev, cp[cur_s], cp[cur_s-1]);
-                // std::cout << "light : x" << cur_s << "→ x" << cur_s-1 << " : " << dir2area(cp[cur_s].pdf_rev, cp[cur_s], cp[cur_s-1]) << "\n";
-                // std::cout << cp[cur_s].pdf_rev << std::endl;
-                // std::cout << "(" << cp[cur_s].x.x << ", " << cp[cur_s].x.y << ", " << cp[cur_s].x.z << ")" << " → ";
-                // std::cout << "(" << cp[cur_s-1].x.x << ", " << cp[cur_s-1].x.y << ", " << cp[cur_s-1].x.z << ")" << "\n";
-            }
-            
-            ++cur_t; --cur_s;
-            if(cur_s>0)   P /= dir2area(cp[cur_s-1].pdf_W, cp[cur_s-1], cp[cur_s]);
-            else P /= cp[0].pdf_A; //s=0
-            out.push_back({cur_s, cur_t, P});
-        }
-        else{
-            if(cur_t == t) {
-                P   *= dir2area(cal_pdf(cl[cur_t-1], cp[cur_s-1]), cl[cur_t-1], cp[cur_s-1]);
-                // std::cout << "light : y" << cur_t-1 << ", x" << cur_s-1 << " : " << cal_pdf(cl[cur_t-1], cp[cur_s-1]) << "\n";
-                // std::cout << "light : y" << cur_t-1 << ", x" << cur_s-1 << " : " << dir2area(cal_pdf(cl[cur_t-1], cp[cur_s-1]), cl[cur_t-1], cp[cur_s-1]) << "\n";
-            }
-            else{
-                if(cur_s>0) P *= dir2area(cp[cur_s].pdf_rev, cp[cur_s], cp[cur_s-1]);
-                // std::cout << "light : x" << cur_s << ", x" << cur_s-1 << " : " << P << "\n";
-                // std::cout << "(" << cp[cur_s].x.x << ", " << cp[cur_s].x.y << ", " << cp[cur_s].x.z << ")" << " → ";
-                // std::cout << "(" << cp[cur_s-1].x.x << ", " << cp[cur_s-1].x.y << ", " << cp[cur_s-1].x.z << ")" << "\n";
-            }
-            ++cur_t; --cur_s;
-            if(cur_s>0)   P /= dir2area(cp[cur_s-1].pdf_W, cp[cur_s-1], cp[cur_s]);
-            else P /= cp[0].pdf_A; //s=0
-            out.push_back({cur_s, cur_t, P});
-        }
-
+    for(int i = 0; i < path_length; i++) {
+        if(i < cl.size() - 1) l2c[i] = dir2area(fp[fp.size() - 1 - i].pdf_W, fp[fp.size() - 1 - i], fp[fp.size() - 2 - i]);
+        else if(i == cl.size() - 1) l2c[i] = dir2area(cal_pdf(fp[fp.size() - 1 - i], fp[fp.size() - 2 - i]), fp[fp.size() - 1 - i], fp[fp.size() - 2 - i]);
+        else l2c[i] = dir2area(fp[fp.size() - 1 - i].pdf_rev, fp[fp.size() - 1 - i], fp[fp.size() - 2 - i]);
     }
+
+    for(int i=0;i<c2l.size();i++){
+        std::cout << "c2l[" << i << "] = " << c2l[i] << std::endl;
+    }
+    std::cout << std::endl;
+    for(int i=0;i<l2c.size();i++){
+        std::cout << "l2c[" << i << "] = " << l2c[i] << std::endl;
+    }
+
+    for(int i = 0; i < s + t + 1; i++) {
+        float p = 1.0f;
+
+        if(i != 0) p *= fp[fp.size() - 1].pdf_A;
+        if(i != s + t) p *= fp[0].pdf_A;
+
+        if(s + t - i >= 2) for(int k = 0; k <= (s + t - 1) - 2; k++) p *= c2l[k];
+        if(i >= 2) for(int k = 0; k <= i - 2; k++) p *= l2c[k];
+
+        out.push_back({s + t - i, i, p});
+    }
+
 
 
     return out;
