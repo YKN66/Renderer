@@ -57,10 +57,10 @@ inline float cal_pdf(const PathVertex& v_from, const PathVertex& v_to){
     return pdf;
 }
 
-struct StrategyPDF { 
-    int s,t; 
-    float pdf; 
-};
+// struct StrategyPDF { 
+//     int s,t; 
+//     float pdf; 
+// };
 
 // std::vector<StrategyPDF> compute_strategy_pdfs(const std::vector<PathVertex>& cp, const std::vector<PathVertex>& cl, int s, int t) {
 
@@ -169,61 +169,107 @@ struct StrategyPDF {
 // }
 
 
-std::vector<StrategyPDF> compute_strategy_pdfs(const std::vector<PathVertex>& cp, const std::vector<PathVertex>& cl, int s, int t) {
+// std::vector<StrategyPDF> compute_strategy_pdfs(const std::vector<PathVertex>& cp, const std::vector<PathVertex>& cl, int s, int t) {
 
-    const int path_length = static_cast<int>(cp.size() + cl.size()) - 1;
-    std::vector<StrategyPDF> out;
-    out.reserve(s + t);
+//     const int path_length = static_cast<int>(cp.size() + cl.size()) - 1;
+//     std::vector<StrategyPDF> out;
+//     out.reserve(s + t);
 
-    std::vector<float> c2l(path_length, 0.0f);
-    std::vector<float> l2c(path_length, 0.0f);
-    // c2l.reserve(path_length);
-    // l2c.reserve(path_length);
+//     std::vector<float> c2l(path_length, -1.0f);
+//     std::vector<float> l2c(path_length, -1.0f);
+//     // c2l.reserve(path_length);
+//     // l2c.reserve(path_length);
 
-    auto fp = make_full_path(cp, cl);
+//     auto fp = make_full_path(cp, cl);
 
-    // for(int i=0;i<fp.size();i++){
-    //     std::cout << i << std::endl;
-    //     std::cout << "x = (" << fp[i].x.x << ", " << fp[i].x.y << ", " << fp[i].x.z << ")" << std::endl;
-    //     std::cout << "pdf = (" << fp[i].pdf_W << ", " << fp[i].pdf_rev << ")" << std::endl;
-    // }
+//     // for(int i=0;i<fp.size();i++){
+//     //     std::cout << i << std::endl;
+//     //     std::cout << "x = (" << fp[i].x.x << ", " << fp[i].x.y << ", " << fp[i].x.z << ")" << std::endl;
+//     //     std::cout << "pdf = (" << fp[i].pdf_W << ", " << fp[i].pdf_rev << ")" << std::endl;
+//     // }
 
-    for(int i = 0; i < path_length; i++) {
-        if(i < cp.size() - 1) c2l[i] = dir2area(fp[i].pdf_W, fp[i], fp[i + 1]);
-        else if(i == cp.size() - 1) c2l[i] = dir2area(cal_pdf(fp[i], fp[i + 1]), fp[i], fp[i + 1]);
-        else c2l[i] = dir2area(fp[i].pdf_rev, fp[i], fp[i + 1]);
+//     // for(int i = 0; i < path_length; i++) {
+//     //     if(i < cp.size() - 1) c2l[i] = dir2area(fp[i].pdf_W, fp[i], fp[i + 1]);
+//     //     else if(i == cp.size() - 1) c2l[i] = dir2area(cal_pdf(fp[i], fp[i + 1]), fp[i], fp[i + 1]);
+//     //     else c2l[i] = dir2area(fp[i].pdf_rev, fp[i], fp[i + 1]);
+//     // }
+
+//     // for(int i = 0; i < path_length; i++) {
+//     //     if(i < cl.size() - 1) l2c[i] = dir2area(fp[fp.size() - 1 - i].pdf_W, fp[fp.size() - 1 - i], fp[fp.size() - 2 - i]);
+//     //     else if(i == cl.size() - 1) l2c[i] = dir2area(cal_pdf(fp[fp.size() - 1 - i], fp[fp.size() - 2 - i]), fp[fp.size() - 1 - i], fp[fp.size() - 2 - i]);
+//     //     else l2c[i] = dir2area(fp[fp.size() - 1 - i].pdf_rev, fp[fp.size() - 1 - i], fp[fp.size() - 2 - i]);
+//     // }
+
+
+//     for(int i = 0; i < path_length; i++) c2l[i] = dir2area(cal_pdf(fp[i], fp[i + 1]), fp[i], fp[i + 1]);
+//     for(int i = 0; i < path_length; i++) l2c[i] = dir2area(cal_pdf(fp[fp.size() - 1 - i], fp[fp.size() - 2 - i]), fp[fp.size() - 1 - i], fp[fp.size() - 2 - i]);
+
+//     std::cout << std::endl;std::cout << std::endl;
+//     for(int i=0;i<c2l.size();i++) std::cout << "c2l[" << i << "] = " << c2l[i] << std::endl;
+//     std::cout << std::endl;
+//     for(int i=0;i<l2c.size();i++) std::cout << "l2c[" << i << "] = " << l2c[i] << std::endl;
+//     std::cout << std::endl;
+
+//     for(int i = 0; i < s + t + 1; i++) {
+//         float p = 1.0f;
+
+//         if(i != 0) p *= fp[fp.size() - 1].pdf_A;
+//         if(i != s + t) p *= fp[0].pdf_A;
+
+//         if(s + t - i >= 2) for(int k = 0; k <= (s + t - 1) - 2; k++) p *= c2l[k];
+//         if(i >= 2) for(int k = 0; k <= i - 2; k++) p *= l2c[k];
+
+//         out.push_back({s + t - i, i, p});
+//     }
+
+//     return out;
+// }
+
+
+inline float calcMISWeight(
+    int lightIdx, int viewIdx, float edgePdfArea, float lf, float lr, float vf, float vr, const std::vector<PathVertex>& lp, const std::vector<PathVertex>& vp) {
+    float p_st = lp[lightIdx].pdf_A * vp[viewIdx].pdf_A * edgePdfArea;
+    if(p_st == 0.0) return 0.0;
+
+    float denom = p_st * p_st;
+
+    float prod = p_st * vf / lf;   // (s , t-1)
+    denom += prod * prod;
+
+    for(int i = lightIdx - 1; i >= 0; --i){      // (s , t-2 … 0)
+        prod *= lp[i+1].pdf_rev / lp[i].pdf_W;
+        denom += prod * prod;
     }
 
-    for(int i = 0; i < path_length; i++) {
-        if(i < cl.size() - 1) l2c[i] = dir2area(fp[fp.size() - 1 - i].pdf_W, fp[fp.size() - 1 - i], fp[fp.size() - 2 - i]);
-        else if(i == cl.size() - 1) l2c[i] = dir2area(cal_pdf(fp[fp.size() - 1 - i], fp[fp.size() - 2 - i]), fp[fp.size() - 1 - i], fp[fp.size() - 2 - i]);
-        else l2c[i] = dir2area(fp[fp.size() - 1 - i].pdf_rev, fp[fp.size() - 1 - i], fp[fp.size() - 2 - i]);
+
+    prod = p_st;
+    if(viewIdx > 0){
+        prod *= lf / vp[viewIdx-1].pdf_W;        // (s-1 , t)
+        denom += prod * prod;
+    }
+    if(viewIdx > 1){
+        prod *= vr / vp[viewIdx-2].pdf_W;        // (s-2 , t)
+        denom += prod * prod;
+    }
+    for(int i = viewIdx - 3; i >= 0; --i){       // (s-3 … 0 , t)
+        prod *= vp[i+1].pdf_rev / vp[i].pdf_W;
+        denom += prod * prod;
     }
 
-    for(int i=0;i<c2l.size();i++){
-        std::cout << "c2l[" << i << "] = " << c2l[i] << std::endl;
-    }
-    std::cout << std::endl;
-    for(int i=0;i<l2c.size();i++){
-        std::cout << "l2c[" << i << "] = " << l2c[i] << std::endl;
-    }
-
-    for(int i = 0; i < s + t + 1; i++) {
-        float p = 1.0f;
-
-        if(i != 0) p *= fp[fp.size() - 1].pdf_A;
-        if(i != s + t) p *= fp[0].pdf_A;
-
-        if(s + t - i >= 2) for(int k = 0; k <= (s + t - 1) - 2; k++) p *= c2l[k];
-        if(i >= 2) for(int k = 0; k <= i - 2; k++) p *= l2c[k];
-
-        out.push_back({s + t - i, i, p});
-    }
-
-
-
-    return out;
+    return (denom > 0.0) ? (p_st * p_st) / denom : 0.0;
 }
+
+inline float misWeight_ST(int s,int t, const std::vector<PathVertex>& cp, const std::vector<PathVertex>& lp) {
+    if(s==0||t==0) return 1.0;      // 直接光 or 直接カメラは従来通り
+    const auto& vc = cp[s-1];
+    const auto& vl = lp[t-1];
+
+    float edgePdfA = dir2area(cal_pdf(vc,vl), vc, vl);
+    return calcMISWeight(t-1, s-1, edgePdfA, vl.pdf_W, vl.pdf_rev, vc.pdf_W, vc.pdf_rev, lp, cp);
+}
+
+
+
 
 
 
@@ -277,6 +323,7 @@ Vec3 bdpt_render(const Camera& camera, const std::vector<std::shared_ptr<Object>
             // if(idx < 0) continue;
             // float w = mis_power_heuristic(pdfs, idx, 2.0f);
             float w = simple_mis(s, t);
+            // float w = misWeight_ST(s, t, c_path, l_path);
 
 
             // float sum_w = 0.0f;

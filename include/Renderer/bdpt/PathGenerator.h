@@ -8,7 +8,7 @@ static bool bounce_walk(std::vector<PathVertex>& path, const std::vector<std::sh
 
     const int  kRRStartDepth  = 3;
 
-    const PathVertex& prev = path.back();
+    PathVertex& prev = path.back();
     Ray ray(prev.x + prev.N * 1e-4f, prev.wi);
 
     float closest_t = 1e30f;
@@ -54,9 +54,11 @@ static bool bounce_walk(std::vector<PathVertex>& path, const std::vector<std::sh
     int depth = int(path.size()) - 1;
 
     // if(depth >= kRRStartDepth){
-    //     float q = std::clamp(vn.beta.max_component(), 0.05f, 0.95f); // 生存確率
-    //     if(random_float() > q) return false;   // 打ち切り
-    //     vn.beta /= q;                   // 生存補正
+    //     float q = std::clamp(vn.beta.max_component(), 0.0f, 1.0f); // 生存確率
+    //     if(random_float() > q) return false;
+    //     vn.beta /= q;
+    //     // prev.pdf_W *= q;
+    //     // vn.pdf_rev *= q;
     // }
 
     if (pdf_W < 1e-6f) return false;

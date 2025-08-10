@@ -27,6 +27,7 @@ public:
     }
 
     float pdf(const Vec3& N, const Vec3& wi) const override {
-        return 0.0f;
+        // return 0.0f;
+        return std::max(0.0f, N.dot(wi)) / M_PI;
     }
 };

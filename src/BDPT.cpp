@@ -16,7 +16,7 @@
 int main() {
     const int image_width = 800;
     const int image_height = 400;
-    const int sample_num = 200;
+    const int sample_num = 10;
 
     std::vector<std::shared_ptr<Object>> scene;
     Camera camera = controll_scene(image_width, image_height, scene);
