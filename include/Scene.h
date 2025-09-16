@@ -50,7 +50,7 @@ Camera controll_scene(const int w, const int h, std::vector<std::shared_ptr<Obje
 
 
 
-    // scene.push_back(std::make_shared<Sphere>(Vec3(-0.5, -0.80, 0), 0.2, yellow));
+    scene.push_back(std::make_shared<Sphere>(Vec3(-0.5, -0.80, 0), 0.2, yellow));
 
 
     auto cube_mat = green;

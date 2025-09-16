@@ -8,7 +8,7 @@ cmake_policy(SET CMP0074 NEW)
 set(CMAKE_C_COMPILER  "/opt/homebrew/opt/llvm/bin/clang"   CACHE STRING "" FORCE)
 set(CMAKE_CXX_COMPILER "/opt/homebrew/opt/llvm/bin/clang++" CACHE STRING "" FORCE)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # libomp のプレフィックスを教える
@@ -53,6 +53,7 @@ add_executable(cos
    	src/Camera.cpp
 )
 link_openmp(cos)
+
 add_executable(nee
 	src/NEE.cpp
 	src/Vec3.cpp
@@ -60,6 +61,7 @@ add_executable(nee
    	src/Camera.cpp
 )
 link_openmp(nee)
+
 add_executable(bdpt
 	src/BDPT.cpp
 	src/Vec3.cpp
@@ -67,6 +69,12 @@ add_executable(bdpt
    	src/Camera.cpp
 )
 link_openmp(bdpt)
+
+add_executable(bpt
+	src/BPT.cpp
+)
+link_openmp(bpt)
+
 add_executable(compPT
 	src/comparePT.cpp
 	src/Vec3.cpp
@@ -74,6 +82,7 @@ add_executable(compPT
    	src/Camera.cpp
 )
 link_openmp(compPT)
+
 add_executable(subtract
 	diff/diff.cpp
 )
