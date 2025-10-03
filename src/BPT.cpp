@@ -1,5 +1,3 @@
-// created by YUKI KOBAYASHI
-// all right reseaved.
 
 #include <iostream>
 #include <fstream>  
@@ -15,15 +13,14 @@
 
 inline constexpr int image_width = 800;
 inline constexpr int image_height = 400;
-inline constexpr int sample_num = 10;
-inline const std::string filename = "results/bpt" + std::to_string(sample_num) + ".pfm";
+inline constexpr int sample_num = 100;
+inline const std::string filename = "results/bptPower" + std::to_string(sample_num) + ".pfm";
+
 
 inline constexpr float kPi = std::numbers::pi_v<float>;
 inline constexpr float k2Pi = 2.0f * kPi;
 inline constexpr float kEps = 1e-6f;
 inline constexpr float kEpsShadow = 1e-4f;
-inline constexpr int kMaxDepth = 10;
-inline constexpr int  kRRStartDepth  = 3;
 
 inline float deg2rad(float d){ return d * (kPi / 180.0f);}
 inline float rad2deg(float f){ return f * (180.0f / kPi);}
@@ -275,7 +272,6 @@ public:
     }
 
     Vec3 sample(const Vec3& N, const Vec3& wo, float& pdf) const override {
-        pdf = 0.0f;
         return Vec3(0.0f, 0.0f, 0.0f);
     }
 
@@ -563,7 +559,6 @@ Camera build_scene(const int w, const int h, std::vector<std::shared_ptr<Object>
 
     return camera;
 }
-
 // === 6. Path Generators ===
 struct PathVertex {
     Vec3 x; // 位置
@@ -575,12 +570,26 @@ struct PathVertex {
     float pdf_W = 1.0f; // 方向測度pdf(サンプリングに使った側)
     float pdf_rev = 1.0f; // 逆遷移の方向測度pdf
     Vec3 beta = Vec3(1.0f, 1.0f, 1.0f); // 通過スループット
+    float vc = 0.0f, vcm = 0.0f; // MIS補助(Veachの定式化に対応)
     bool isDelta = false;   // サンプリングに使った BSDF が Dirac か
     bool is_light = false;
 };
 
 static bool bounce_walk(std::vector<PathVertex>& path, const std::vector<std::shared_ptr<Object>>& scene, bool isLight) {
+
+    const int  kRRStartDepth  = 3;
+
     PathVertex& prev = path.back();
+
+    float q = 1.0f;
+    if(int(path.size()) - 1 >= kRRStartDepth){
+        q = std::clamp(prev.beta.max_component(), 0.05f, 0.95f);
+        if(random_float() > q) return false;
+        // prev.beta /= q;
+        prev.pdf_W *= q;
+        // prev.pdf_rev *= q;
+    }
+
     Ray ray(prev.x + prev.N * kEpsShadow, prev.wi);
 
     float closest_t = 1e30f;
@@ -613,25 +622,32 @@ static bool bounce_walk(std::vector<PathVertex>& path, const std::vector<std::sh
     vn.is_light = hit_obj->is_light();
 
     // ---- β 更新 ----
-    if(std::dynamic_pointer_cast<Sensor>(prev.brdf)) { vn.beta = prev.beta;}
-    else{
-        Vec3 d = (vn.x - prev.x).normalize();
-        float cosPrev = std::max(0.f, prev.N.dot(d));
-        Vec3 fs = prev.is_light ? Vec3(1.0f, 1.0f, 1.0f) : prev.brdf->evaluate(prev.N, prev.wi, prev.wo);
-        vn.beta = prev.beta * fs * cosPrev / std::max(prev.pdf_W, kEps);
+    Vec3 d = (vn.x - prev.x).normalize();
+    float cosPrev = std::max(0.f, prev.N.dot(d));
+    Vec3 fs = prev.is_light ? Vec3(1.0f, 1.0f, 1.0f) : prev.brdf->evaluate(prev.N, prev.wi, prev.wo);
+    vn.beta = prev.beta * fs * cosPrev / std::max(prev.pdf_W, kEps);
+
+
+    float p = 1.0f;
+    if(int(path.size()) >= kRRStartDepth){
+        p = std::clamp(vn.beta.max_component(), 0.05f, 0.95f);
+        vn.pdf_rev *= p;
     }
+
+    float ratio = (prev.pdf_W > kEps) ? prev.pdf_rev / prev.pdf_W : 0.f;
+    vn.vc  = prev.vcm;
+    vn.vcm = prev.vcm * ratio;
 
     path.push_back(vn);
-    int depth = int(path.size()) - 1;
+    // int depth = int(path.size()) - 1;
 
-    if(depth >= kRRStartDepth && !path.back().is_light && !std::dynamic_pointer_cast<Sensor>(path.back().brdf)){
-        float p = std::clamp(vn.beta.max_component(), 0.05f, 0.95f); // 生存確率
-        if(random_float() > p) return false;
-        path.back().beta /= p;
-        // path.back().pdf_W *= p;
-        path[path.size() -2].pdf_W *= p;
-        path.back().pdf_rev *= p;
-    }
+    // if(depth >= kRRStartDepth){
+    //     float q = std::clamp(vn.beta.max_component(), 0.0f, 1.0f); // 生存確率
+    //     if(random_float() > q) return false;
+    //     vn.beta /= q;
+    //     prev.pdf_W *= q;
+    //     // vn.pdf_rev *= q;
+    // }
 
     if (pdf_W < kEps) return false;
     if (path.size()>1 && vn.is_light && !isLight) return false;
@@ -655,10 +671,16 @@ std::vector<PathVertex> generate_camera_subpath(const Camera& camera, const std:
     float pdf_dir   = (cos_theta > 0.0f) ? 1.0f / (cos_theta * cos_theta * cos_theta * A_img) : 0.0f;
 
     v0.pdf_A = 1.0f / A_img;
-    // v0.pdf_W = cos_theta;
-    v0.pdf_W = pdf_dir;
+    // float pdf_dir   = v0.pdf_A * dist2 / (cos_theta * cos_theta * cos_theta);
+    v0.pdf_W = cos_theta;
     v0.pdf_rev = pdf_dir;
+    // v0.beta /= v0.pdf_W;
     v0.beta = Vec3(1.0f, 1.0f, 1.0f);
+    v0.vc = 0.0f;
+    // v0.vcm = 1.0f;
+    v0.vcm = A_img / v0.pdf_W;
+    Vec3 l = v0.beta * v0.pdf_W;
+    // std::cout << "test = ("<< l.x <<", "<< l.y <<", "<< l.z <<")\n";
     v0.is_light = false;
     path.push_back(v0);
 
@@ -704,6 +726,8 @@ std::vector<PathVertex> generate_light_subpath(const std::vector<std::shared_ptr
     v0.pdf_W = pdf_dir;
     v0.pdf_rev = pdf_dir;
     v0.beta = Vec3(0.0f, 0.0f, 0.0f);
+    v0.vc = 0.0f;
+    v0.vcm = 1.0f;
     v0.is_light = true;
     float selPdf = 1.0f; // numLights（将来拡張用）
     float emissionPdf = v0.pdf_A*pdf_dir*selPdf; // 未使用
@@ -780,6 +804,16 @@ float mis_power_heuristic(const std::vector<float>& pdfs, int i, float beta = 2.
 
 float simple_mis(int s, int t) {return 1.0f / float(s + t - 1);}
 
+inline void debug_mis_sum(const std::vector<float>& pdfs, float beta = 2.f, const char* tag = ""){
+    float sum = 0.f;
+    for(size_t k = 0; k < pdfs.size(); ++k)
+        sum += mis_power_heuristic(pdfs, static_cast<int>(k), beta);
+
+    if(std::fabs(sum - 1.f) > kEpsShadow)
+        std::fprintf(stderr,
+            "[MIS-SUM] %s Σw = %.9f (|err| = %.3e, n = %zu)\n",
+            tag, sum, std::fabs(sum - 1.f), pdfs.size());
+}
 
 inline std::vector<PathVertex> make_full_path(const std::vector<PathVertex>& c_path, const std::vector<PathVertex>& l_path) {
     std::vector<PathVertex> full;
@@ -846,10 +880,10 @@ std::vector<StrategyPDF> compute_strategy_pdfs(const std::vector<PathVertex>& cp
     auto camera2light=[&](int a,int b){
         float p = 1.0f;
         for(int i=a;i<=b;++i){
-            float t = dir2area(cp[i].pdf_W, cp[i], cp[i+1]);
-            // float t = 1.0f;
-            // if(i==0) t = dir2area(cp[0].pdf_rev, cp[i], cp[i+1]);
-            // else t = dir2area(cp[i].pdf_W, cp[i], cp[i+1]);
+            // float t = dir2area(cp[i].pdf_W, cp[i], cp[i+1]);
+            float t = 1.0f;
+            if(i==0) t = dir2area(cp[0].pdf_rev, cp[i], cp[i+1]);
+            else t = dir2area(cp[i].pdf_W, cp[i], cp[i+1]);
             // std::cout << "camera : x" << i << " → x" << i+1 << " : " << t << "\n";
             p *= t;
         }
@@ -914,9 +948,8 @@ std::vector<StrategyPDF> compute_strategy_pdfs(const std::vector<PathVertex>& cp
             
             ++cur_t; --cur_s;
             if(cur_s>0){
-                P /= dir2area(cp[cur_s-1].pdf_W, cp[cur_s-1], cp[cur_s]);
-                // if(cur_s-1 == 0) P /= dir2area(cp[0].pdf_rev, cp[cur_s-1], cp[cur_s]);
-                // else P /= dir2area(cp[cur_s-1].pdf_W, cp[cur_s-1], cp[cur_s]);
+                if(cur_s-1 == 0) P /= dir2area(cp[0].pdf_rev, cp[cur_s-1], cp[cur_s]);
+                else P /= dir2area(cp[cur_s-1].pdf_W, cp[cur_s-1], cp[cur_s]);
             }
             else P /= cp[0].pdf_A; //s=0
             out.push_back({cur_s, cur_t, P});
@@ -934,11 +967,7 @@ std::vector<StrategyPDF> compute_strategy_pdfs(const std::vector<PathVertex>& cp
                 // std::cout << "(" << cp[cur_s-1].x.x << ", " << cp[cur_s-1].x.y << ", " << cp[cur_s-1].x.z << ")" << "\n";
             }
             ++cur_t; --cur_s;
-            if(cur_s>0){
-                P /= dir2area(cp[cur_s-1].pdf_W, cp[cur_s-1], cp[cur_s]);
-                // if(cur_s - 1 == 0) P /= dir2area(cp[0].pdf_rev, cp[cur_s-1], cp[cur_s]);
-                // else P /= dir2area(cp[cur_s-1].pdf_W, cp[cur_s-1], cp[cur_s]);
-            }
+            if(cur_s>0)   P /= dir2area(cp[cur_s-1].pdf_W, cp[cur_s-1], cp[cur_s]);
             else P /= cp[0].pdf_A; //s=0
             out.push_back({cur_s, cur_t, P});
         }
@@ -951,8 +980,10 @@ std::vector<StrategyPDF> compute_strategy_pdfs(const std::vector<PathVertex>& cp
 
 Vec3 bdpt_render(const Camera& camera, const std::vector<std::shared_ptr<Object>>& scene, float u, float v, float& mis_error) {
 
-    auto l_path = generate_light_subpath(scene, kMaxDepth - 1);
-    auto c_path = generate_camera_subpath(camera, scene, u, v, kMaxDepth - 1);
+    const int MaxDepth = 1000;
+    auto l_path = generate_light_subpath(scene, MaxDepth - 1);
+
+    auto c_path = generate_camera_subpath(camera, scene, u, v, MaxDepth - 1);
 
     Vec3 radiance(0.0f, 0.0f, 0.0f);
 
@@ -962,20 +993,19 @@ Vec3 bdpt_render(const Camera& camera, const std::vector<std::shared_ptr<Object>
     // std::cout << "tMax " << tMax << std::endl << std::endl;
 
     for(int s=2; s<=sMax; ++s){
-        const PathVertex& vc = c_path[s - 1];
+        const PathVertex& vc = c_path[s-1];
 
         for(int t=0; t<=tMax; ++t){
             Vec3 contrib;
 
             if (t == 0) {
-                const auto& lightPoint = c_path[s - 1];
-                if (s <= c_path.size() && lightPoint.is_light){
-                    contrib = lightPoint.beta * lightPoint.brdf->get_emission();
-
+                const auto& vl = c_path[s - 1];
+                if (s <= c_path.size() && vl.is_light){
+                    contrib = vl.beta * vl.brdf->get_emission();
                 }
             }
             else{
-                const PathVertex& vl = l_path[t - 1];
+                const PathVertex& vl = l_path[t-1];
                 Vec3 G = connect_vertices(vc, vl, scene);
                 if(G.is_zero()) continue;
 
@@ -1142,6 +1172,7 @@ inline void write_pfm(const std::string& filename, const std::vector<float>& dat
 }
 
 
+
 // === 9. main() ===
 #ifdef _OPENMP
   #include <omp.h>
@@ -1150,6 +1181,7 @@ inline void write_pfm(const std::string& filename, const std::vector<float>& dat
   // 非OpenMP環境向けのダミー　pragmaは無視されるので何もしない
 #endif
 int main() {
+
     std::vector<std::shared_ptr<Object>> scene;
     Camera camera = build_scene(image_width, image_height, scene);
 
@@ -1183,6 +1215,7 @@ int main() {
     for (int y = 0; y < image_height; ++y) {
         for (int x = 0; x < image_width; ++x) {
             Vec3 color = framebuffer[y * image_width + x];
+            // Vec3 color = framebuffer[y * image_width + x] / float(sample_num);
             size_t idx = (y * image_width + x) * 3;
             pixels[idx + 0] = color.x; 
             pixels[idx + 1] = color.y; 
