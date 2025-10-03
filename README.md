@@ -1,7 +1,7 @@
 # Bidirectional Path Tracing Renderer  
 _C++17 / CMake / stb_image_write / OpenMP
 
-![パストレーシングによるレンダリング画像](docs/images/cos_10000.png)
+![パストレーシングによるレンダリング画像](docs/images/bdpt.png)
 
 
 > レイトレーシング → コサイン加重パストレーシング → Next Event Estimation → **双方向パストレーシング (BDPT)**  
@@ -56,16 +56,19 @@ cd build
 cmake ..
 cmake --build .
 
-### レイトレーシングでレンダリング
+### レイキャスティング
+./build/raycasting             # 出力 → results/rc.pfm
+
+### レイトレーシング
 ./build/raytracing             # 出力 → results/rt.pfm
 
-### コサインウェイトサンプリングを用いたパストレーシングでレンダリング
+### コサインウェイトサンプリングを用いたパストレーシング
 ./build/cosweight              # 出力 → results/cos.pfm
 
-### NEEを用いたパストレーシングでレンダリング
+### NEEを用いたパストレーシング
 ./build/NEE                    # 出力 → results/nee.pfm
 
-### BDPTでレンダリング(実装中)
+### BDPT
 ./build/bdpt                   # 出力 → results/bdpt.pfm
 
 ### BDPT でパス長毎にレンダリング
@@ -90,10 +93,12 @@ deactivate                     # 仮想環境終了
 
 | ファイル | 内容 |
 | :-- | :-- |
+| ![rc](docs/images/rc.png) | レイトレーシングの結果 |
 | ![rt](docs/images/rt.png) | レイトレーシングの結果 |
 | ![cos](docs/images/cos.png) | コサインウェイトサンプリングによるパストレーシングの結果 |
 | ![nee](docs/images/nee.png) | NEEを用いたパストレーシングの結果 |
-| ![bdpt](docs/images/bdpt.png) | 双方向パストレーシングの結果 |
+| ![bdpt](docs/images/bpt.png) | 双方向パストレーシング(MISなし) |
+| ![bdpt](docs/images/bdpt.png) | 双方向パストレーシング(MIS = Power heuristic) |
 | ![diff](docs/images/diff.png) | `compare.cpp` による差分ヒートマップ |
 
 ## 検証フロー<a name="検証"></a>
